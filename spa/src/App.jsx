@@ -9,7 +9,7 @@ import './Output.css'
 function App() {
 
   const keycloak = new Keycloak({
-    url: "http://localhost:9080",
+    url: "http://localhost:8080",
     realm: "master",
     clientId: "oauth2-appointmed-spa"
   })
@@ -46,9 +46,3 @@ function App() {
 
 export default App
 
-
-
-
-// 891104114207-j7ae61qh56r1n62afm8tlnq08lattueb.apps.googleusercontent.com
-
-// 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
