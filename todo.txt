@@ -1,0 +1,4 @@
+2) Mockups to define UI components
+3) Define Microservices
+4) Implement Microservice/UI
+5)
