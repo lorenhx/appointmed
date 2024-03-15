@@ -13,7 +13,6 @@ const SearchBar = () => {
     const [specialization, setSpecialization] = useState(null);
 
     const handleChange = value => {
-        console.log("value:", value);
         setSpecialization(value);
     };
 
@@ -24,7 +23,7 @@ const SearchBar = () => {
             options={specializations}
             primaryColor={"blue"}
             isMultiple={true}
-            placeholder="Select Doctor specialization"
+            placeholder="Select Specialization"
             isSearchable={true}
         />
         
