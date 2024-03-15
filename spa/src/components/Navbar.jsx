@@ -53,7 +53,7 @@ const Navbar = () => {
         {navItems.map(item => (
           <li
             key={item.id}
-            className='p-4 hover:bg-[#00df9a] rounded-xl m-2 cursor-pointer duration-300 hover:text-black'
+            className='p-4 hover:bg-blue-500 rounded-xl m-2 cursor-pointer duration-300 hover:text-black'
             onClick={item.onClick} // Add onClick event
           >
             {item.text}
@@ -81,7 +81,7 @@ const Navbar = () => {
         {navItems.map(item => (
           <li
             key={item.id}
-            className='p-4 border-b rounded-xl hover:bg-[#00df9a] duration-300 hover:text-black cursor-pointer border-white'
+            className='p-4 border-b rounded-xl hover:bg-blue-500 duration-300 hover:text-black cursor-pointer border-white'
             onClick={() => handleItemClick(item.text)} // Add onClick event
           >
             {item.text}

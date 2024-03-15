@@ -1,25 +1,12 @@
-import React from 'react';
-import { useKeycloak } from '@react-keycloak/web';
-import Private from './Private';
-
+import React from "react";
+import Navbar from "./Navbar";
+import SearchBar from "./SearchBar";
 
 const Home = () => {
-  const { keycloak } = useKeycloak();
-  const isAuthenticated = keycloak.authenticated;
-
-  const handleLogin = () => {
-    keycloak.login();
-  };
-
   return (
-    <div>
-      {isAuthenticated ? (
-        <Private></Private>
-      ) : (
-        <div>
-          <button onClick={handleLogin}>Login</button>
-        </div>
-      )}
+    <div className="flex-col space-y-36">
+      <Navbar></Navbar>
+      <SearchBar></SearchBar>         
     </div>
   );
 };
