@@ -20,6 +20,7 @@ const GoogleSearch = () => {
         value: result.description,
         label: `📍 ${result.description}`,
       }));
+      console.log(predictions)
       setLocations(predictions);
     }
   }, [isPlacePredictionsLoading]);
@@ -31,10 +32,15 @@ const GoogleSearch = () => {
         getPlacePredictions({ input: e.target.value });
         setText(e.target.value);
       }}
+      onChange={(value) => {
+        setText(value);
+      }}
       options={locations}
       primaryColor={"blue"}
       placeholder="Select Location"
       isSearchable={true}
+      loading={isPlacePredictionsLoading}
+      noOptionsMessage={"No Locations found"}
     />
   );
 };
