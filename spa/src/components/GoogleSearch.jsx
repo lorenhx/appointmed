@@ -9,7 +9,7 @@ const GoogleSearch = () => {
 
   const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } =
     useGoogle({
-      apiKey: "",
+      apiKey: "AIzaSyAjCbtqSRLofTvzPjXDzni4CumBmV6-zks",
       sessionToken: false,
       debounce: "500",
     });
