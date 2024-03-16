@@ -20,8 +20,7 @@ const Home = () => {
     navigate("/appointments");
   };
   return (
-    <div className="bg-[url('/doctor1.jpg')] bg-cover h-screen">
-      <Navbar />
+
       <div className="mt-20 flex justify-start">
         <div className="bg-gradient-to-r from-blue-300 to-blue-500 w-1/2 py-6 rounded-lg ml-16">
           <div className="flex justify-center">
@@ -46,7 +45,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

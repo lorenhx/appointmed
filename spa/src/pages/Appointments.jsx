@@ -12,7 +12,7 @@ const array = [
   "aaaaaaaaaaaaaaa",
   "Via antonio 1",
   "via caspita2",
-  "aaaaaaaaaaaaaaa"
+  "aaaaaaaaaaaaaaa",
 ];
 
 const array1 = ["Visita1  50$", "Visita2  100$", "Visita3  350$"];
@@ -58,16 +58,12 @@ const Appointments = () => {
       visitsLabel: "Select visit",
       onItemClick: null,
     },
-    
   ];
 
   return (
-    <div className="bg-[url('/doctor1.jpg')] bg-cover h-screen max-h-screen overflow-y-auto">
-      <Navbar />
-      <div className="container mx-auto flex space-x-5">
-        <FiltersContainer />
-        <DoctorResultsRowContainer doctorData={doctorData} />
-      </div>
+    <div className="container mx-auto flex space-x-5">
+      <FiltersContainer />
+      <DoctorResultsRowContainer doctorData={doctorData} />
     </div>
   );
 };

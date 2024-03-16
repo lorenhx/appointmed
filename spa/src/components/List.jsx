@@ -9,7 +9,7 @@ const List = ({ items, onItemClick, label }) => {
         {items.map((item, index) => (
           <li
             key={index}
-            className="text-black mb-2 cursor-pointer transition-colors duration-300 hover:bg-blue-500"
+            className="text-black mb-2 cursor-pointer transition-colors duration-300 hover:bg-blue-200"
             onClick={() => onItemClick(index)}
           >
             {item}
