@@ -1,32 +1,23 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import Select from "react-tailwindcss-select";
 
-const specializations = [
-    { value: "Cardiologist", label: "🫀 Cardiologist" },
-    { value: "Nutritionist", label: "🥗 Nutritionist" },
-    { value: "Neurologist", label: "🧠 Neurologist" },
-    { value: "Ent", label: "👂🏼 Ent" },
-    { value: "Ophthalmologist", label: "👓 Ophthalmologist" },
-];
+const SearchBar = ({ options, primaryColor, isMultiple, placeholder, isSearchable }) => {
+    const [selectedOption, setSelectedOption] = useState(null);
 
-const SearchBar = () => {
-    const [specialization, setSpecialization] = useState(null);
-
-    const handleChange = value => {
-        setSpecialization(value);
+    const handleChange = (value) => {
+        setSelectedOption(value);
     };
 
     return (
         <Select
-            value={specialization}
+            value={selectedOption}
             onChange={handleChange}
-            options={specializations}
-            primaryColor={"blue"}
-            isMultiple={true}
-            placeholder="Select Specialization"
-            isSearchable={true}
+            options={options}
+            primaryColor={primaryColor}
+            isMultiple={isMultiple}
+            placeholder={placeholder}
+            isSearchable={isSearchable}
         />
-        
     );
 };
 

@@ -1,8 +1,9 @@
 import React from 'react'
 import Keycloak from 'keycloak-js'
-import Home from './components/Home'
+import Home from './pages/Home'
 import Navbar from './components/Navbar'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Appointments from './pages/Appointments'
 import { ReactKeycloakProvider } from '@react-keycloak/web'
 import './Output.css'
 
@@ -36,8 +37,8 @@ function App() {
       <Router>
         <Routes>
           <Route path='/' element={<Navbar />} />
-          <Route path='/home' element={<div><Home /></div>} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path='/home' element={<Home />}/>
+          <Route path="/appointments" element={<Appointments/>} />
         </Routes>
       </Router>
     </ReactKeycloakProvider>
