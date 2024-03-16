@@ -7,6 +7,7 @@ const ReviewContainer = ({
   rating,
   profilePhoto,
   mainSpecialization,
+  reviewCount,
 }) => {
   const renderStars = (rating) => {
     const stars = [];
@@ -24,23 +25,22 @@ const ReviewContainer = ({
   };
 
   return (
-    <div className="bg-white  max-h-36 p-4 shadow-md flex">
-      {" "}
-      {/* Added items-stretch class */}
+    <div className="bg-white max-h-36 p-4 shadow-md flex items-center">
       <div className="w-1/3">
         <img
           src={profilePhoto}
           alt="Profile"
-          className="rounded-full  w-16 h-16"
+          className="rounded-full w-16 h-16"
         />
       </div>
-      <div className="w-2/3 ml-1">
+      <div className="w-2/3 ml-4">
         <h2 className="text-lg font-semibold">{name}</h2>
-        <div className="flex mt-2">{renderStars(rating)}</div>
-        <div className="flex flex-wrap mt-2 italic text-gray-500">
-            <p  className="mr-2">
-              {mainSpecialization}
-            </p>
+        <div className="flex flex-wrap mt-1 italic text-gray-500">
+          <p className="mr-2">{mainSpecialization}</p>
+        </div>
+        <div className="flex mt-1">{renderStars(rating)}</div>
+        <div className="flex flex-wrap mt-1 italic text-gray-500">
+          <p>{reviewCount} reviews</p> 
         </div>
       </div>
     </div>
@@ -48,4 +48,3 @@ const ReviewContainer = ({
 };
 
 export default ReviewContainer;
-

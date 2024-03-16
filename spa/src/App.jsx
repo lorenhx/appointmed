@@ -7,6 +7,7 @@ import Appointments from "./pages/Appointments";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import "./Output.css";
 
+
 function App() {
   const keycloak = new Keycloak({
     url: "http://localhost:8080",

@@ -1,5 +1,4 @@
 import React from "react";
-import Navbar from "../components/Navbar";
 import FiltersContainer from "../components/FiltersContainer";
 import DoctorResultsRowContainer from "../components/DoctorResultsRowContainer";
 
@@ -22,6 +21,7 @@ const reviewData = {
   rating: 4,
   profilePhoto: "/profile.jpg",
   mainSpecialization: "Cardiologist",
+  reviewCount: 73
 };
 
 const Appointments = () => {
