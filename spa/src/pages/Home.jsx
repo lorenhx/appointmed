@@ -3,6 +3,7 @@ import SearchBar from "../components/SearchBar";
 import GoogleSearch from "../components/GoogleSearch";
 import SearchButton from "../components/SearchButton";
 import { useNavigate } from "react-router-dom";
+import SimpleMap from "../components/GoogleMap";
 
 const specializations = [
   { value: "Cardiologist", label: "🫀 Cardiologist" },
@@ -19,31 +20,31 @@ const Home = () => {
     navigate("/appointments");
   };
   return (
-
-      <div className="mt-20 flex justify-start">
-        <div className="bg-gradient-to-r from-blue-300 to-blue-500 w-1/2 py-6 rounded-lg ml-16">
-          <div className="flex justify-center">
-            <div className="w-1/4 mr-2">
-              <SearchBar
-                options={specializations}
-                primaryColor={"blue"}
-                isMultiple={true}
-                placeholder="Specializations"
-                isSearchable={true}
-                className="mb-5"
-              />
-            </div>
-            <div className="w-1/2 mr-2">
-              <GoogleSearch />
-            </div>
+    <div className="mt-20 flex justify-start">
+      <div className="bg-gradient-to-r from-blue-300 to-blue-500 w-1/2 py-6 rounded-lg ml-16">
+        <div className="flex justify-center">
+          <div className="w-1/4 mr-2">
+            <SearchBar
+              options={specializations}
+              primaryColor={"blue"}
+              isMultiple={true}
+              placeholder="Specializations"
+              isSearchable={true}
+              className="mb-5"
+            />
           </div>
-          <div className="flex justify-center mt-4">
-            <div className="max-w-md">
-              <SearchButton onSearch={onSearch} />
-            </div>
+          <div className="w-1/2 mr-2">
+            <GoogleSearch />
           </div>
         </div>
+        <div className="flex justify-center mt-4">
+          <div className="max-w-md">
+            <SearchButton onSearch={onSearch} />
+          </div>
+        </div>
+
       </div>
+    </div>
   );
 };
 

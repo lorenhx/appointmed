@@ -15,6 +15,7 @@ const GoogleSearch = () => {
     });
 
   useEffect(() => {
+    console.log(placePredictions)
     if (!isPlacePredictionsLoading && placePredictions) {
       let predictions = placePredictions.map((result) => ({
         value: result.description,

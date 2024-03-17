@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Appointments from "./pages/Appointments";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import "./Output.css";
-
+import AppointmentReservationPage from "./pages/AppointmentReservationPage";
 
 function App() {
   const keycloak = new Keycloak({
@@ -37,7 +37,17 @@ function App() {
         <div className="bg-[url('/doctor1.jpg')] bg-cover h-screen">
           <Navbar />
           <Routes>
-            <Route path="/" element={<Navbar />} />
+            <Route
+              path="/appointments/reservation"
+              element={<AppointmentReservationPage
+                visitName="Dental Checkup"
+                visitPrice="$50"
+                doctorName="Dr. John Doe"
+                doctorLocation="123 Main Street"
+                doctorEmail="doctor@example.com"
+                phone="+123 456 7890"
+                coordinates={[[40.85, 14.26]]}
+              />}/>
             <Route path="/home" element={<Home />} />
             <Route path="/appointments" element={<Appointments />} />
           </Routes>

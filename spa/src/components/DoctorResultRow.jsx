@@ -9,7 +9,7 @@ const DoctorResultRow = ({ reviewData, locations, locationsLabel, visitsLabel, s
         <ReviewContainer {...reviewData} />
       </div>
       <div className="w-2/5">
-      <List items={locations} label={locationsLabel} onItemClick={onItemClick} />
+      <List items={locations.map(location => location.location)} label={locationsLabel} onItemClick={onItemClick} />
       </div>
       <div className="w-2/5">
         <List items={strings} label={visitsLabel} onItemClick={onItemClick} />
