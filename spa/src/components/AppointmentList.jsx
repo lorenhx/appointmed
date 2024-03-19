@@ -8,6 +8,7 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
+import FilterBar from "./FilterBar";
 
 const columnHelper = createColumnHelper();
 
@@ -40,7 +41,7 @@ const data = [
     location: "Location A",
     price: "$100",
     "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "PENDING",
+    status: "PENDING ⏳",
     "timestamp+timeslot": "30 min",
   },
   {
@@ -48,7 +49,7 @@ const data = [
     location: "Location A",
     price: "$100",
     "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "CONFIRMED",
+    status: "CONFIRMED ✔️",
     "timestamp+timeslot": "1h",
   },
   {
@@ -56,7 +57,7 @@ const data = [
     location: "Location A",
     price: "$100",
     "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "REJECTED",
+    status: "REJECTED ❌",
     "timestamp+timeslot": "1h30",
   },
   // Add more data as needed
@@ -66,6 +67,10 @@ export default function App() {
   const [sorting, setSorting] = React.useState([]);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [showPopup, setShowPopup] = React.useState(false);
+  const handleFilterChange = (filter) => {
+    // Implement filtering logic here
+    console.log("Filter:", filter);
+  };
 
   const table = useReactTable({
     data,
@@ -102,14 +107,16 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col w-3/4  h-screen mx-auto py-8">
-      <div className="overflow-x-auto">
-        <table className="border">
+    <div className="container mx-auto flex h-screen py-24 gap-24">
+      {/* Filter bar */}
+      <FilterBar handleFilterChange={handleFilterChange} />
+      <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
+        <table className="border w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="border-b text-gray-800 uppercase bg-white"
+                className="border-b text-gray-800 uppercase bg-blue-500"
               >
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 pr-2 py-4  text-left">
@@ -141,7 +148,7 @@ export default function App() {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={selectedRow === row ? "bg-gray-200" : "bg-white"}
+                className={selectedRow === row ? "bg-blue-300" : "bg-white"}
                 onClick={() => handleRowClick(row)}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -153,59 +160,64 @@ export default function App() {
             ))}
           </tbody>
         </table>
-      </div>
-      <div className="flex sm:flex-row flex-col w-full mt-8 items-center gap-2 text-xs">
-        <div className="flex gap-2">
-          <button
-            className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="w-5 h-5 text-white font-bold">{"<<"}</span>
-          </button>
-          <button
-            className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="w-5 h-5 text-white font-bold">{"<"}</span>
-          </button>
-          <span className="flex items-center gap-1 text-white font-bold">
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </span>
-          <button
-            className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="w-5 h-5 text-white font-bold">{">"}</span>
-          </button>
-          <button
-            className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="w-5 h-5 text-white font-bold">{">>"}</span>
-          </button>
+
+        <div className="flex justify-center w-full mt-8">
+          <div className="flex gap-2">
+            <button
+              className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span className="w-1 h-1 text-white font-bold">{"<<"}</span>
+            </button>
+            <button
+              className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span className="w-5 h-5 text-white font-bold">{"<"}</span>
+            </button>
+            <span
+              className="text-black font-bold"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <span className="w-5 h-5 text-white font-bold">{">"}</span>
+            </button>
+            <button
+              className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <span className="w-5 h-5 text-white font-bold">{">>"}</span>
+            </button>
+          </div>
+          <div className="flex justify-center w-full mt-8">
+            <div className="flex justify-center mt-4">
+              <button
+                className="bg-green-500 text-white font-semibold px-6 py-3 rounded-md mr-4 hover:bg-green-300"
+                onClick={handleConfirmClick}
+              >
+                Confirm
+              </button>
+              <button
+                className="bg-red-500 text-white font-semibold px-6 py-3 rounded-md hover:bg-red-300"
+                onClick={handleRejectClick}
+              >
+                Reject
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      {selectedRow && (
-        <div className="flex justify-center mt-4">
-          <button
-            className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-md mr-4"
-            onClick={handleConfirmClick}
-          >
-            Confirm
-          </button>
-          <button
-            className="bg-red-500 text-white font-semibold px-6 py-3 rounded-md"
-            onClick={handleRejectClick}
-          >
-            Reject
-          </button>
-        </div>
-      )}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-lg">
