@@ -7,6 +7,8 @@ import Appointments from "./pages/Appointments";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import "./Output.css";
 import AppointmentReservationPage from "./pages/AppointmentReservationPage";
+import AppointmentList from './components/AppointmentList'
+
 
 function App() {
   const keycloak = new Keycloak({
@@ -34,7 +36,7 @@ function App() {
       onEvent={(event, error) => handleOnEvent(event, error)}
     >
       <Router>
-        <div className="bg-[url('/doctor1.jpg')] bg-cover h-screen">
+        <div className="bg-[url('/doctor1.jpg')] bg-cover h-full">
           <Navbar />
           <Routes>
             <Route
@@ -50,6 +52,7 @@ function App() {
               />}/>
             <Route path="/home" element={<Home />} />
             <Route path="/appointments" element={<Appointments />} />
+            <Route path="/manage" element={<AppointmentList />} />
           </Routes>
         </div>
       </Router>

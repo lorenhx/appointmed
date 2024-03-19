@@ -24,7 +24,7 @@ export default function GoogleMap({ center, coordinates }) {
   return (
       <GoogleMapReact
         bootstrapURLKeys={{
-          key: "AIzaSyDCQB_fyEbSb_eAOsHoupV_90n9Vm3Clps",
+          key: "",
         }}
         defaultCenter={center || {
           lat: 40.85,

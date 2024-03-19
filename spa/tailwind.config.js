@@ -1,10 +1,16 @@
-/** @type {import('tailwindcss').Config} */
+
+
 module.exports = {
-  
-  content: ["./src/**/*.{html,js,jsx}", "./node_modules/react-tailwindcss-select/dist/index.esm.js"],
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/react-tailwindcss-select/dist/index.esm.js",
+    // Or if using `src` directory:
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
-    extend: {
-    }
-},
-  plugins: [require("tailwindcss"), require("autoprefixer")],
-};
+    extend: {},
+  },
+  plugins: [],
+}

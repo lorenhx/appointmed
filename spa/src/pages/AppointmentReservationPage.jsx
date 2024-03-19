@@ -3,7 +3,6 @@ import GoogleMap from "../components/GoogleMap"; // Assuming you have a GoogleMa
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useKeycloak } from "@react-keycloak/web";
-import { useNavigate } from "react-router-dom";
 
 const AppointmentReservationPage = ({
   visitName,
@@ -61,7 +60,7 @@ const AppointmentReservationPage = ({
               onKeyDown={(e) => {
                 e.preventDefault();
               }}
-            />{" "}
+            />
           </div>
           {/* Doctor Information */}
           <div className="mb-4">
