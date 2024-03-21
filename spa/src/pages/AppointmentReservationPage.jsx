@@ -22,6 +22,7 @@ const AppointmentReservationPage = ({
       // Here you can perform actions like sending email and show popup
       // For demo, we'll just toggle the popup visibility
       setShowPopup(true);
+      console.log(keycloak.token)
     } else {
       // Redirect to login page
       keycloak.login();

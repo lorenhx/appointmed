@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import SearchBar from "./SearchBar";
 import DatePicker from "react-datepicker";
+import SearchButton from "./SearchButton";
 import "react-datepicker/dist/react-datepicker.css";
 
 const FilterBar = ({ handleFilterChange }) => {
@@ -42,10 +43,10 @@ const FilterBar = ({ handleFilterChange }) => {
   };
 
   return (
-    <div>
-      <h2 className="text-lg text-black  font-semibold mb-4">
+    <div className="bg-blue-300 p-4 rounded-md shadow-md h-max">
+      <h2 className="text-lg text-white font-semibold mb-4">
         Filter your results
-      </h2>{" "}
+      </h2>
       <div className="flex flex-col gap-4">
         <SearchBar
           options={options}
@@ -68,42 +69,39 @@ const FilterBar = ({ handleFilterChange }) => {
           onChange={handleVisitTypeChange}
           isSearchable={false}
         />
-        <div>
-          <DatePicker
-            selected={startDate}
-            onChange={handleStartDateChange}
-            showTimeSelect
-            dateFormat="Pp"
-            minDate={new Date()}
-            maxDate={endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
-            preventOpenOnFocus={true}
-            onKeyDown={(e) => {
-              e.preventDefault();
-            }}
-            className="border rounded-md p-2"
-            wrapperClassName="border rounded-md p-2"
-            calendarClassName="text-lg"
-            placeholderText="Select start timestamp"
-          />
-        </div>
-        <div>
-          <DatePicker
-            selected={endDate}
-            onChange={handleEndDateChange}
-            showTimeSelect
-            dateFormat="Pp"
-            minDate={startDate}
-            maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
-            preventOpenOnFocus={true}
-            onKeyDown={(e) => {
-              e.preventDefault();
-            }}
-            className="border rounded-md p-2"
-            wrapperClassName="border rounded-md p-2"
-            calendarClassName="text-lg"
-            placeholderText="Select end timestamp"
-          />
-        </div>
+        <DatePicker
+          selected={startDate}
+          onChange={handleStartDateChange}
+          showTimeSelect
+          dateFormat="Pp"
+          minDate={new Date()}
+          maxDate={endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+          preventOpenOnFocus={true}
+          onKeyDown={(e) => {
+            e.preventDefault();
+          }}
+          className="border rounded-md p-2"
+          wrapperClassName="border rounded-md p-2"
+          calendarClassName="text-lg"
+          placeholderText="Select start timestamp"
+        />
+        <DatePicker
+          selected={endDate}
+          onChange={handleEndDateChange}
+          showTimeSelect
+          dateFormat="Pp"
+          minDate={startDate}
+          maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+          preventOpenOnFocus={true}
+          onKeyDown={(e) => {
+            e.preventDefault();
+          }}
+          className="border rounded-md p-2"
+          wrapperClassName="border rounded-md p-2"
+          calendarClassName="text-lg"
+          placeholderText="Select end timestamp"
+        />
+        <SearchButton onSearch={null}></SearchButton>
       </div>
     </div>
   );

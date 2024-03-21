@@ -1,2 +1,27 @@
-spring.application.name=appointmed
-app.cors.allowed-origins=*
+spring:
+  application:
+    name: appointmed
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/appointmed
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/master
+
+jwt:
+  auth:
+    converter:
+      resource-id: appointmed
+
+app:
+  cors:
+    allowed-origins: "*"
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+server:
+  port: 9080
