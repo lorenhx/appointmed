@@ -16,7 +16,7 @@ import java.util.List;
 public class Location {
 
     @Id
-    public int id;
+    public String id;
     public String address;
     public String name;
     public String openHours;

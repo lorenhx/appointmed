@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("review")
 public class Review {
     @Id
-    public int id;
+    public String id;
     public String title;
     public String description;
     public int stars;

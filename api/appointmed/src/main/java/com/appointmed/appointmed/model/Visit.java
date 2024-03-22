@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("visit")
 public class Visit {
     @Id
-    public int id;
+    public String id;
     public String type;
     public float price;
     Specialization specialization;

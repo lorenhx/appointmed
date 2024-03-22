@@ -15,7 +15,7 @@ import java.time.Instant;
 public class Appointment {
 
     @Id
-    public int id;
+    public String id;
     public String userEmail;
     public Instant startTimestamp;
     public Instant issuedTimestamp;

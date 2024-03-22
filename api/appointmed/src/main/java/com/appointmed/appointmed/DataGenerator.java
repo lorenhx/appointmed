@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class DataGenerator implements CommandLineRunner {
@@ -51,8 +52,20 @@ public class DataGenerator implements CommandLineRunner {
     }
 
     private void generateData() {
+
+        // Generate synthetic data for reviews
+        Review review = new Review();
+        review.setTitle("Great Experience");
+        review.setDescription("The doctor was very knowledgeable and attentive.");
+        review.setStars(5);
+        review.setPatientEmail("patient@example.com");
+//        reviewRepository.save(review);
+
+        List<Review> l = new ArrayList<>();
+        l.add(review);
+
         // Generate synthetic data for doctors
-        Doctor doctor = new Doctor("doctor@example.com", new ArrayList<>(), Arrays.asList(Specialization.CARDIOLOGIST), new ArrayList<>());
+        Doctor doctor = new Doctor("doctor@example.com",  l, List.of(Specialization.CARDIOLOGIST), new ArrayList<>());
         doctorRepository.save(doctor);
 
         // Generate synthetic data for locations
@@ -61,17 +74,10 @@ public class DataGenerator implements CommandLineRunner {
         location.setName("Clinic XYZ");
         location.setOpenHours("9:00 AM - 5:00 PM");
         location.setPaymentTypes(Arrays.asList(PaymentType.CASH, PaymentType.CREDIT_CARD));
-        location.setAccessibility(Arrays.asList(Accessibility.PREGNANT));
-        location.setContactInfo(Arrays.asList(new ContactInfo("123-456-7890", "clinic@example.com", null, "www.clinicxyz.com")));
+        location.setAccessibility(List.of(Accessibility.PREGNANT));
+        location.setContactInfo(List.of(new ContactInfo("123-456-7890", "clinic@example.com", null, "www.clinicxyz.com")));
         locationRepository.save(location);
 
-        // Generate synthetic data for reviews
-        Review review = new Review();
-        review.setTitle("Great Experience");
-        review.setDescription("The doctor was very knowledgeable and attentive.");
-        review.setStars(5);
-        review.setPatientEmail("patient@example.com");
-        reviewRepository.save(review);
 
         // Generate synthetic data for appointments
         Appointment appointment = new Appointment();
