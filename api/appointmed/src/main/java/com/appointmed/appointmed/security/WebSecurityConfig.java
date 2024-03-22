@@ -25,10 +25,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(HttpMethod.GET, "/api/appointments", "/api/movies/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/appointments").permitAll()
                         .requestMatchers("/api/patients").hasAnyRole(APPOINTMED_PATIENT, APPOINTMED_ADMIN)
-                        .requestMatchers("/api/doctors", "/api/movies/**").hasRole(APPOINTMED_DOCTOR)
+                        .requestMatchers("/api/doctors").hasRole(APPOINTMED_DOCTOR)
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(
                         jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
