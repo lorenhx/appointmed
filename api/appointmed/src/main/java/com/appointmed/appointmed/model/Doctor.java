@@ -16,15 +16,10 @@ import java.util.List;
 public class Doctor {
 
     @Id
-    public String email;
-//    public String name;
-//    public String surname;
-//    public String taxId;
-//    public String imageLink;
-//ctl /     These attributes are going to be taken from keycloak database
-    public List<Review> reviews;
-    public List<Specialization> specializations;
-    public List<Visit> visits;
-
+    private String email;
+    private List<Review> reviews;
+    private List<Specialization> specializations;
+    private List<Location> locations;
+    private List<Appointment> appointments;
 
 }

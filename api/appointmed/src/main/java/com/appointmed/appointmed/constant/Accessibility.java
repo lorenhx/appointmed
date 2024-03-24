@@ -1,7 +1,6 @@
 package com.appointmed.appointmed.constant;
 
 public enum Accessibility {
-
     PREGNANT,
     CHILDREN,
     MOBILITY_IMPAIRMENT,

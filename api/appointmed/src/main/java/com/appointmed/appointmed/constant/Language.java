@@ -1,4 +1,5 @@
 package com.appointmed.appointmed.constant;
+
 public enum Language {
     ENGLISH,
     SPANISH,

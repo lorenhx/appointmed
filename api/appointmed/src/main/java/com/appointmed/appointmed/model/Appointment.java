@@ -1,7 +1,6 @@
 package com.appointmed.appointmed.model;
 
 import com.appointmed.appointmed.constant.ReservationStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -15,20 +14,24 @@ import java.time.Instant;
 public class Appointment {
 
     @Id
-    public String id;
-    public String userEmail;
-    public Instant startTimestamp;
-    public Instant issuedTimestamp;
-    public String notes;
-    public ReservationStatus status;
-    public Visit visit;
+    private String id;
+    private String patientEmail;
+    private String doctorEmail;
+    private Instant startTimestamp;
+    private Instant issuedTimestamp;
+    private String notes;
+    private ReservationStatus status;
+    private Visit visit;
+    private Location location;
 
-    public Appointment(String userEmail, Instant startTimestamp, Instant issuedTimestamp, String notes, ReservationStatus status, Visit visit) {
-        this.userEmail = userEmail;
+    public Appointment(String patientEmail, String doctorEmail, Instant startTimestamp, Instant issuedTimestamp, String notes, ReservationStatus status, Visit visit, Location location) {
+        this.patientEmail = patientEmail;
+        this.doctorEmail = doctorEmail;
         this.startTimestamp = startTimestamp;
         this.issuedTimestamp = issuedTimestamp;
         this.notes = notes;
         this.status = status;
         this.visit = visit;
+        this.location = location;
     }
 }

@@ -1,7 +1,6 @@
 package com.appointmed.appointmed.model;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -13,11 +12,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ContactInfo {
 
     @Id
-    public String id;
-    String phoneNumber;
-    String email;
-    String faxNumber;
-    String websiteUrl;
+    private String id;
+    private String phoneNumber;
+    private String email;
+    private String faxNumber;
+    private String websiteUrl;
 
     public ContactInfo(String phoneNumber, String email, String faxNumber, String websiteUrl) {
         this.phoneNumber = phoneNumber;

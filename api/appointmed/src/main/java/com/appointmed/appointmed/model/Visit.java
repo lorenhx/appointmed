@@ -8,21 +8,24 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Document("visit")
 public class Visit {
+
     @Id
-    public String id;
-    public String type;
-    public float price;
+    private String id;
+    private String type;
+    private float price;
+    private int timeSlotMinutes;
     Specialization specialization;
-    public int timeSlotMinutes;
 
     public Visit(String type, float price, Specialization specialization, int timeSlotMinutes) {
         this.type = type;
         this.price = price;
         this.specialization = specialization;
         this.timeSlotMinutes = timeSlotMinutes;
+
     }
 }
 
