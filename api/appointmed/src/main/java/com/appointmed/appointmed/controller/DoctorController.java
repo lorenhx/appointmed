@@ -5,15 +5,20 @@ import com.appointmed.appointmed.constant.Specialization;
 import com.appointmed.appointmed.dto.*;
 import com.appointmed.appointmed.mapper.DoctorMapper;
 import com.appointmed.appointmed.service.DoctorService;
+import com.appointmed.appointmed.service.EmailService;
+import com.appointmed.appointmed.service.UserService;
+import com.appointmed.appointmed.util.HtmlTemplateGenerator;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +26,9 @@ import java.util.*;
 public class DoctorController {
 
     private final DoctorService doctorService;
+    private final UserService userService;
     private final DoctorMapper doctorMapper;
+    private final EmailService emailService;
 
 
     @Operation(
@@ -29,7 +36,6 @@ public class DoctorController {
             description = "A non-authenticated user can get a list of doctors for him to choose the visit from the preferred location.")
     @GetMapping()
     public DoctorListDataDto getDoctorListData(@RequestParam List<Specialization> specializations, @RequestParam String location, @RequestParam int range) {
-
 
         List<DoctorDto> doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
 
@@ -48,6 +54,22 @@ public class DoctorController {
         return Specialization.values();
     }
 
+    @Operation(
+            summary = "Adds a doctor.",
+            description = "An admin can add a doctor to the system. Personal data along with appointments data is required."
+    )
+    @PostMapping
+    public void addDoctor(@RequestBody DoctorDto doctorDto){
+        String temporaryPassword = userService.addUser(doctorDto.getName(), doctorDto.getSurname(), doctorDto.getEmail(),
+                doctorDto.getAttributes(), new String[]{"APPOINTMED_DOCTOR"});
+        doctorService.addDoctor(doctorMapper.doctorDtoToDoctor(doctorDto));
+        try {
+            emailService.sendHtmlEmail("appointmed@outlook.it", doctorDto.getEmail(), "Doctor account created.",
+                    HtmlTemplateGenerator.generateAccountConfirmationEmail(doctorDto.getName(), doctorDto.getSurname(), temporaryPassword));
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
+    }
 
     private List<DoctorDto> getDoctorsBySpecializationsAndLocationInRange(List<Specialization> specializations, String location, int range) {
         return doctorService.getDoctorsBySpecializationsAndLocationInRange(specializations, location, range)

@@ -13,12 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("visit")
 public class Visit {
 
+    Specialization specialization;
     @Id
     private String id;
     private String type;
     private float price;
     private int timeSlotMinutes;
-    Specialization specialization;
 
     public Visit(String type, float price, Specialization specialization, int timeSlotMinutes) {
         this.type = type;

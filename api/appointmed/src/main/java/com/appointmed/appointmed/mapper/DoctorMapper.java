@@ -19,6 +19,8 @@ public abstract class DoctorMapper {
 
     public abstract DoctorDto doctorToDoctorDto(Doctor doctor);
 
+    public abstract Doctor doctorDtoToDoctor(DoctorDto doctor);
+
     @AfterMapping
     protected void setDoctorPersonalInfo(@MappingTarget DoctorDto doctorDto, Doctor doctor) {
         UserDto doctorWithPersonalInfo = null;

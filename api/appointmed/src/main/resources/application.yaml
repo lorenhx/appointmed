@@ -13,7 +13,8 @@ spring:
 jwt:
   auth:
     converter:
-      resource-id: appointmed
+      resource-id: oauth2-appointmed-spa
+      principal-attribute: preferred_username
 
 app:
   cors:

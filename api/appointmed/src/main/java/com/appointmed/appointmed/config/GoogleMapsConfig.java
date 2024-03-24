@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class GoogleMapsConfig {
-
     @Bean
-    public GeoApiContext geoApiContext() {
+    public GeoApiContext createGeoApiContext() {
         return new GeoApiContext.Builder()
                 .apiKey("")
                 .build();

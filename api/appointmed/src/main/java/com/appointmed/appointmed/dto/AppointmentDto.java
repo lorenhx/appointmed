@@ -18,5 +18,6 @@ public class AppointmentDto {
     private float price;
     private String address;
     private PatientDto patient;
+    private String notes;
 
 }

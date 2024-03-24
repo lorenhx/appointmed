@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -69,6 +70,11 @@ public class DoctorServiceImpl implements DoctorService {
         } catch (ApiException | InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void addDoctor(Doctor doctor) {
+        doctorRepository.save(doctor);
     }
 
     private UserRepresentation getUserFromKeycloak(String doctorEmail) {

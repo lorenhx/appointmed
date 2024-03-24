@@ -4,15 +4,25 @@ import com.appointmed.appointmed.constant.ReservationStatus;
 import com.appointmed.appointmed.dto.*;
 import com.appointmed.appointmed.exception.AppointmentNotFound;
 import com.appointmed.appointmed.exception.DoctorNotFound;
+import com.appointmed.appointmed.exception.IDORException;
 import com.appointmed.appointmed.exception.VisitNotFound;
 import com.appointmed.appointmed.mapper.AppointmentMapper;
 import com.appointmed.appointmed.mapper.CreateAppointmentMapper;
+import com.appointmed.appointmed.mapper.ContactInfoMapper;
 import com.appointmed.appointmed.model.Appointment;
+import com.appointmed.appointmed.model.Location;
 import com.appointmed.appointmed.service.AppointmentService;
+import com.appointmed.appointmed.service.EmailService;
+import com.appointmed.appointmed.util.HtmlTemplateGenerator;
+import com.appointmed.appointmed.util.Oauth2TokenIntrospection;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,34 +36,63 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final CreateAppointmentMapper createAppointmentMapper;
     private final AppointmentMapper appointmentMapper;
+    private final ContactInfoMapper contactInfoMapper;
+    private final EmailService emailService;
 
 
     @Operation(
             summary = "Creates appointment in PENDING state.",
             description = "A doctor can create an appointment. The appointment will be persisted on the database and a confirmation email will be sent to the patient.",
-            security = {@SecurityRequirement(name = "AuthorizationHeader")}              )
+            security = {@SecurityRequirement(name = "AuthorizationHeader")})
     @PostMapping()
-    public void createAppointment(@RequestBody CreateAppointmentDto createAppointmentDto) throws VisitNotFound, DoctorNotFound {
+    @PreAuthorize("hasRole('APPOINTMED_PATIENT')")
+    public void createAppointment(@RequestBody CreateAppointmentDto createAppointmentDto) {
+        createAppointmentDto.setDoctorEmail(Oauth2TokenIntrospection.extractEmail());
         Appointment appointment = createAppointmentMapper.createAppointmentDtoToAppointment(createAppointmentDto);
-        appointmentService.createAppointment(appointment);
+        try {
+            appointmentService.createAppointment(appointment);
+            emailService.sendHtmlEmail("appointmed@outlook.it", createAppointmentDto.getPatientEmail(), "Appointmed pending reservation", HtmlTemplateGenerator.generateReservationPendingTemplate(createAppointmentDto.getAddress()));
+        } catch (DoctorNotFound | VisitNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
     }
 
     @Operation(
             summary = "Updates appointment status.",
             description = "A doctor can confirm or reject an appointment.",
-            security = {@SecurityRequirement(name = "AuthorizationHeader")}              )
+            security = {@SecurityRequirement(name = "AuthorizationHeader")})
     @PatchMapping("/{appointmentId}")
-    public void updateAppointmentStatus(@PathVariable String appointmentId, @RequestBody UpdateAppointmentDto updateAppointmentDto) throws AppointmentNotFound {
-        appointmentService.updateAppointmentStatus(appointmentId, updateAppointmentDto.getStatus(), updateAppointmentDto.getNotes());
+    @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
+    public void updateAppointmentStatus(@PathVariable String appointmentId, @RequestBody UpdateAppointmentDto updateAppointmentDto) {
+        updateAppointmentDto.setDoctorEmail(Oauth2TokenIntrospection.extractEmail());
+        ReservationStatus status = updateAppointmentDto.getStatus();
+        try {
+            appointmentService.updateAppointmentStatus(appointmentId, status, updateAppointmentDto.getDoctorEmail(), updateAppointmentDto.getNotes());
+            sendNotificationEmail(appointmentId, updateAppointmentDto);
+        } catch (AppointmentNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IDORException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
+        }
     }
 
     @Operation(
             summary = "Gets doctor appointments along with filters.",
             description = "A doctor can get a list of its appointments for management purposes.",
-            security = {@SecurityRequirement(name = "AuthorizationHeader")}              )
+            security = {@SecurityRequirement(name = "AuthorizationHeader")})
     @GetMapping
-    public DoctorAppointmentListDataDto getDoctorAppointmentListData(@RequestParam String doctorEmail) throws DoctorNotFound {
-        List<Appointment> appointments = appointmentService.getAppointmentsByDoctorEmail(doctorEmail);
+    @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
+    public DoctorAppointmentListDataDto getDoctorAppointmentListData(@RequestParam String doctorEmail) {
+        List<Appointment> appointments = null;
+        try {
+            appointments = appointmentService.getAppointmentsByDoctorEmail(doctorEmail);
+        } catch (DoctorNotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
         List<AppointmentDto> appointmentDtos = appointments.stream()
                 .map(appointmentMapper::appointmentToDto)
                 .toList();
@@ -77,6 +116,47 @@ public class AppointmentController {
                 .collect(Collectors.toList());
 
         return new AppointmentAvailabilityDto(timeSlotMinutes, timeSlotsTaken);
+    }
+
+    private void sendNotificationEmail(String appointmentId, UpdateAppointmentDto updateAppointmentDto) throws MessagingException, AppointmentNotFound {
+        Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+        Location location = appointment.getLocation();
+        List<ContactInfoDto> contactInfoDtos = location.getContactInfo().stream().map(contactInfoMapper::contactInfoToContactInfoDto).toList();
+        if (updateAppointmentDto.getStatus().equals(ReservationStatus.CONFIRMED)) {
+            sendConfirmationEmail(appointment, location, contactInfoDtos, updateAppointmentDto.getNotes());
+        } else if (updateAppointmentDto.getStatus().equals(ReservationStatus.REJECTED)) {
+            sendRejectionEmail(appointment, location, contactInfoDtos, updateAppointmentDto.getNotes());
+        }
+    }
+
+
+    private void sendConfirmationEmail(Appointment appointment, Location location, List<ContactInfoDto> contactInfoDtos, String notes) throws MessagingException {
+        emailService.sendHtmlEmail(
+                "appointmed@outlook.it",
+                appointment.getPatientEmail(),
+                "Appointmed Confirmed!",
+                HtmlTemplateGenerator.generateReservationConfirmedTemplate(
+                        appointment.getStartTimestamp(),
+                        appointment.getVisit().getTimeSlotMinutes(),
+                        contactInfoDtos,
+                        location.getAddress(),
+                        location.getName(),
+                        notes
+                )
+        );
+    }
+
+    private void sendRejectionEmail(Appointment appointment, Location location, List<ContactInfoDto> contactInfoDtos, String notes) throws MessagingException {
+        emailService.sendHtmlEmail(
+                "appointmed@outlook.it",
+                appointment.getPatientEmail(),
+                "Appointmed Rejected!",
+                HtmlTemplateGenerator.generateReservationRejectedTemplate(
+                        location.getName(),
+                        contactInfoDtos,
+                        notes
+                )
+        );
     }
 
 }

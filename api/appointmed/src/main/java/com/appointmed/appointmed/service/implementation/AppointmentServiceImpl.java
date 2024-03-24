@@ -3,6 +3,7 @@ package com.appointmed.appointmed.service.implementation;
 import com.appointmed.appointmed.constant.ReservationStatus;
 import com.appointmed.appointmed.exception.AppointmentNotFound;
 import com.appointmed.appointmed.exception.DoctorNotFound;
+import com.appointmed.appointmed.exception.IDORException;
 import com.appointmed.appointmed.exception.VisitNotFound;
 import com.appointmed.appointmed.model.Appointment;
 import com.appointmed.appointmed.model.Doctor;
@@ -10,7 +11,6 @@ import com.appointmed.appointmed.model.Location;
 import com.appointmed.appointmed.model.Visit;
 import com.appointmed.appointmed.repository.AppointmentRepository;
 import com.appointmed.appointmed.repository.DoctorRepository;
-import com.appointmed.appointmed.repository.LocationRepository;
 import com.appointmed.appointmed.repository.VisitRepository;
 import com.appointmed.appointmed.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -68,16 +68,27 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void updateAppointmentStatus(String id, ReservationStatus status, String notes) throws AppointmentNotFound {
+    public void updateAppointmentStatus(String id, ReservationStatus status, String doctorEmail, String notes) throws AppointmentNotFound, IDORException {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
         if (optionalAppointment.isEmpty())
             throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exists.");
 
         Appointment appointment = optionalAppointment.get();
+        if (!appointment.getDoctorEmail().equals(doctorEmail))
+            throw new IDORException("You are trying to access a resource you do not own!");
+
         appointment.setStatus(status);
         appointment.setNotes(notes);
         appointmentRepository.save(appointment);
         System.out.println(appointmentRepository.findAll());
+    }
+
+    @Override
+    public Appointment getAppointmentById(String id) throws AppointmentNotFound {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
+        if (optionalAppointment.isEmpty())
+            throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exists.");
+        return optionalAppointment.get();
     }
 
     private Location findMatchingLocation(Doctor doctor, String address) {
