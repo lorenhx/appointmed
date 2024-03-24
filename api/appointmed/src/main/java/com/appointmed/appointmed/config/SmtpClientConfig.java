@@ -16,7 +16,7 @@ public class SmtpClientConfig {
         mailSender.setPort(587);
 
         mailSender.setUsername("appointmed@outlook.it");
-        mailSender.setPassword("qJAn-)mn7.g)cd=");
+        mailSender.setPassword("");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
