@@ -20,7 +20,7 @@ public interface AppointmentService {
 
     void createAppointment(Appointment appointment) throws VisitNotFound, DoctorNotFound;
 
-    void updateAppointmentStatus(String id, ReservationStatus status, String doctorEmail, String notes) throws AppointmentNotFound, IDORException;
+    void updateAppointmentStatus(String id, ReservationStatus status, String notes) throws AppointmentNotFound, IDORException;
 
 
     Appointment getAppointmentById(String appointmentId) throws AppointmentNotFound;

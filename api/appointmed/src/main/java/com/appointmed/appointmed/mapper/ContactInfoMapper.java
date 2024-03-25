@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component;
 @Component
 public interface ContactInfoMapper {
 
-   ContactInfoDto contactInfoToContactInfoDto(ContactInfo contactInfo);
+    ContactInfoDto contactInfoToContactInfoDto(ContactInfo contactInfo);
 }

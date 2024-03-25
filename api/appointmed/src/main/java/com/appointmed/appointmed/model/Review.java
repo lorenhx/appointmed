@@ -16,11 +16,13 @@ public class Review {
     private String description;
     private ReviewStars stars;
     private String patientEmail;
+    private String appointmentId;
 
-    public Review(String title, String description, ReviewStars stars, String patientEmail) {
+    public Review(String title, String description, ReviewStars stars, String patientEmail, String appointmentId) {
         this.title = title;
         this.description = description;
         this.stars = stars;
         this.patientEmail = patientEmail;
+        this.appointmentId = appointmentId;
     }
 }

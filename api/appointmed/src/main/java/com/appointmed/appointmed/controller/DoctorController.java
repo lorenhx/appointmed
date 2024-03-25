@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -62,7 +61,7 @@ public class DoctorController {
             description = "An admin can add a doctor to the system. Personal data along with appointments data is required."
     )
     @PostMapping
-    public void addDoctor(@RequestBody DoctorDto doctorDto){
+    public void addDoctor(@RequestBody DoctorDto doctorDto) {
         String temporaryPassword = userService.addUser(doctorDto.getName(), doctorDto.getSurname(), doctorDto.getEmail(),
                 doctorDto.getAttributes(), new String[]{"APPOINTMED_DOCTOR"});
         doctorService.addDoctor(doctorMapper.doctorDtoToDoctor(doctorDto));

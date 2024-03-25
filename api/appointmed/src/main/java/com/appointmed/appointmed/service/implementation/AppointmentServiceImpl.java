@@ -13,9 +13,11 @@ import com.appointmed.appointmed.repository.AppointmentRepository;
 import com.appointmed.appointmed.repository.DoctorRepository;
 import com.appointmed.appointmed.repository.VisitRepository;
 import com.appointmed.appointmed.service.AppointmentService;
+import com.appointmed.appointmed.util.Oauth2TokenIntrospection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,21 +62,22 @@ public class AppointmentServiceImpl implements AppointmentService {
         Location matchingLocation = findMatchingLocation(doctor, appointment.getLocation().getAddress());
 
         appointment.setVisit(visit);
+        appointment.setIssuedTimestamp(Instant.now());
         appointment.setLocation(matchingLocation);
         doctor.getAppointments().add(appointment);
 
-        appointmentRepository.save(appointment);
+        System.out.println(appointmentRepository.save(appointment).getId());
         doctorRepository.save(doctor);
     }
 
     @Override
-    public void updateAppointmentStatus(String id, ReservationStatus status, String doctorEmail, String notes) throws AppointmentNotFound, IDORException {
+    public void updateAppointmentStatus(String id, ReservationStatus status, String notes) throws AppointmentNotFound, IDORException {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
         if (optionalAppointment.isEmpty())
             throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exists.");
 
         Appointment appointment = optionalAppointment.get();
-        if (!appointment.getDoctorEmail().equals(doctorEmail))
+        if (!appointment.getDoctorEmail().equals(Oauth2TokenIntrospection.extractEmail()))
             throw new IDORException("You are trying to access a resource you do not own!");
 
         appointment.setStatus(status);

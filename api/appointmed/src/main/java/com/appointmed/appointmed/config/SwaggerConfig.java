@@ -12,6 +12,7 @@ public class SwaggerConfig {
 
     @Value("${spring.application.name}")
     private String applicationName;
+
     @Bean
     public OpenAPI createOpenApi() {
         return new OpenAPI()

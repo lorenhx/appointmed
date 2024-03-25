@@ -12,4 +12,5 @@ public class ReviewDto {
     private String description;
     private ReviewStars stars;
     private String patientEmail;
+    private String appointmentId;
 }

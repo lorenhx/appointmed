@@ -7,8 +7,8 @@ import com.appointmed.appointmed.exception.DoctorNotFound;
 import com.appointmed.appointmed.exception.IDORException;
 import com.appointmed.appointmed.exception.VisitNotFound;
 import com.appointmed.appointmed.mapper.AppointmentMapper;
-import com.appointmed.appointmed.mapper.CreateAppointmentMapper;
 import com.appointmed.appointmed.mapper.ContactInfoMapper;
+import com.appointmed.appointmed.mapper.CreateAppointmentMapper;
 import com.appointmed.appointmed.model.Appointment;
 import com.appointmed.appointmed.model.Location;
 import com.appointmed.appointmed.service.AppointmentService;
@@ -68,10 +68,9 @@ public class AppointmentController {
     @PatchMapping("/{appointmentId}")
     @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
     public void updateAppointmentStatus(@PathVariable String appointmentId, @RequestBody UpdateAppointmentDto updateAppointmentDto) {
-        updateAppointmentDto.setDoctorEmail(Oauth2TokenIntrospection.extractEmail());
         ReservationStatus status = updateAppointmentDto.getStatus();
         try {
-            appointmentService.updateAppointmentStatus(appointmentId, status, updateAppointmentDto.getDoctorEmail(), updateAppointmentDto.getNotes());
+            appointmentService.updateAppointmentStatus(appointmentId, status, updateAppointmentDto.getNotes());
             sendNotificationEmail(appointmentId, updateAppointmentDto);
         } catch (AppointmentNotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -88,10 +87,10 @@ public class AppointmentController {
             security = {@SecurityRequirement(name = "AuthorizationHeader")})
     @GetMapping
     @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
-    public DoctorAppointmentListDataDto getDoctorAppointmentListData(@RequestParam String doctorEmail) {
+    public DoctorAppointmentListDataDto getDoctorAppointmentListData() {
         List<Appointment> appointments = null;
         try {
-            appointments = appointmentService.getAppointmentsByDoctorEmail(doctorEmail);
+            appointments = appointmentService.getAppointmentsByDoctorEmail(Oauth2TokenIntrospection.extractEmail());
         } catch (DoctorNotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

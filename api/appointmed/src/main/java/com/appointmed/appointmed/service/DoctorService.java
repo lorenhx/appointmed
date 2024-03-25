@@ -5,7 +5,6 @@ import com.appointmed.appointmed.model.Doctor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public interface DoctorService {

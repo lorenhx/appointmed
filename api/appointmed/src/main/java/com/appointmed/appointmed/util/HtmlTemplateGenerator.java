@@ -1,7 +1,6 @@
 package com.appointmed.appointmed.util;
 
 import com.appointmed.appointmed.dto.ContactInfoDto;
-import com.appointmed.appointmed.model.Location;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

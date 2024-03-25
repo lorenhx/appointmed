@@ -13,8 +13,8 @@ import AppointmentList from './components/AppointmentList'
 function App() {
   const keycloak = new Keycloak({
     url: "http://localhost:8080",
-    realm: "master",
-    clientId: "oauth2-appointmed-spa",
+    realm: "appointmed",
+    clientId: "oauth2-appointmed",
   });
   const initOptions = { pkceMethod: "S256" };
 

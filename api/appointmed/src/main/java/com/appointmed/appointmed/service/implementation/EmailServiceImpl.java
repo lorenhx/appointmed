@@ -2,7 +2,6 @@ package com.appointmed.appointmed.service.implementation;
 
 import com.appointmed.appointmed.service.EmailService;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+
     @Override
     public void sendEmail(String from, String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();

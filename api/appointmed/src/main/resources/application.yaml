@@ -8,16 +8,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/master
+          issuer-uri: http://localhost:8080/realms/appointmed
 
 keycloak:
   realm: master
-  clientId: oauth2-appointmed-spa
+  appointmed-realm: appointmed
+  clientId: oauth2-appointmed
 
 jwt:
   auth:
     converter:
-      resource-id: oauth2-appointmed-spa
+      resource-id: oauth2-appointmed
       principal-attribute: preferred_username
 
 app:
