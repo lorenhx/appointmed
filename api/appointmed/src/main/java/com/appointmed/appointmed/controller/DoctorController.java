@@ -9,6 +9,7 @@ import com.appointmed.appointmed.service.EmailService;
 import com.appointmed.appointmed.service.UserService;
 import com.appointmed.appointmed.util.HtmlTemplateGenerator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Manage doctors.")
+
 @RequestMapping("/api/doctor")
 public class DoctorController {
 

@@ -6,18 +6,28 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 @Configuration
 @Getter
 public class KeycloakAdminConfig {
+
+    private final String realm;
+    private final String clientId;
+
+    public KeycloakAdminConfig(@Value("${keycloak.realm}") String realm, @Value("${keycloak.clientId}") String clientId){
+        this.realm = realm;
+        this.clientId = clientId;
+    }
+
     @Bean
-    public Keycloak createKeycloakAdmin() {
+    public Keycloak keycloak() {
         return KeycloakBuilder.builder()
                 .serverUrl("http://localhost:8080")
-                .realm("master")
+                .realm(this.realm)
                 .username("admin")
                 .password("admin")
-                .clientId("oauth2-appointmed-spa")
+                .clientId(this.clientId)
                 .build();
     }
 

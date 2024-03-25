@@ -17,6 +17,7 @@ import com.appointmed.appointmed.util.HtmlTemplateGenerator;
 import com.appointmed.appointmed.util.Oauth2TokenIntrospection;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Manage appointments.")
 @RequestMapping("/api/appointment")
 public class AppointmentController {
 

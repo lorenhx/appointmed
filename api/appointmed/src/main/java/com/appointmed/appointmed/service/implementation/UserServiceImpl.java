@@ -12,15 +12,23 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final String realm;
+    private final String clientId;
     private final Keycloak keycloak;
+
+    public UserServiceImpl(@Value("${keycloak.realm}") String realm, @Value("${keycloak.clientId}") String clientId, Keycloak keycloak){
+        this.realm = realm;
+        this.clientId = clientId;
+        this.keycloak = keycloak;
+    }
 
     @Override
     public UserDto getUserPersonalInfo(String email) throws UserNotFound {
@@ -40,9 +48,7 @@ public class UserServiceImpl implements UserService {
         credential.setTemporary(true);
         credential.setValue(temporaryPassword);
 
-        RealmResource realmResource = keycloak.realm("master");
-
-        String clientId = "oauth2-appointmed-spa";
+        RealmResource realmResource = keycloak.realm(realm);
 
         UserRepresentation user = new UserRepresentation();
         user.setUsername(email);
@@ -50,6 +56,7 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(name);
         user.setLastName(surname);
         user.setAttributes(attributes);
+        user.setEnabled(true);
         user.setCredentials(Collections.singletonList(credential));
 
         realmResource.users().create(user);
