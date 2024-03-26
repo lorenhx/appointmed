@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Slf4j
-
 @RequiredArgsConstructor
 @Component
 public class MongoInitializer implements CommandLineRunner {
@@ -53,9 +52,9 @@ public class MongoInitializer implements CommandLineRunner {
         contactInfoRepository.save(contactInfo);
 
         // Initialize locations
-        Location location1 = new Location("Doctor's Office Address 1", "Doctor's Office 1", "9:00 AM - 5:00 PM",
+        Location location1 = new Location("Naples", "Doctor's Office 1", "9:00 AM - 5:00 PM",
                 Collections.singletonList(PaymentType.CASH), Collections.singletonList(Accessibility.HEARING_IMPAIRMENT), Collections.singletonList(contactInfo), visits);
-        Location location2 = new Location("Doctor's Office Address 2", "Doctor's Office 2", "10:00 AM - 6:00 PM",
+        Location location2 = new Location("Pozzuoli", "Doctor's Office 2", "10:00 AM - 6:00 PM",
                 Collections.singletonList(PaymentType.CREDIT_CARD), Collections.singletonList(Accessibility.PREGNANT), Collections.singletonList(contactInfo), visits);
         location1.setVisits(Collections.singletonList(visit1));
         location2.setVisits(Collections.singletonList(visit2));
@@ -64,22 +63,22 @@ public class MongoInitializer implements CommandLineRunner {
         // Initialize doctors
         Doctor doctor1 = new Doctor("fabiocinicolo@gmail.com", null, Collections.singletonList(Specialization.DERMATOLOGIST),
                 Collections.singletonList(location1), Collections.emptyList());
-        Doctor doctor2 = new Doctor("john.doe@example.com", null, Collections.singletonList(Specialization.CARDIOLOGIST),
+        Doctor doctor2 = new Doctor("fabiocinicolo@gmail.com", null, Collections.singletonList(Specialization.CARDIOLOGIST),
                 Collections.singletonList(location2), Collections.emptyList());
         doctorRepository.saveAll(Arrays.asList(doctor1, doctor2));
 
 
         // Initialize appointments
-        Appointment appointment1 = new Appointment("patient@example.com", doctor1.getEmail(), Instant.now().plusSeconds(3600),
+        Appointment appointment1 = new Appointment("fabiocinicolo@gmail.com", doctor1.getEmail(), Instant.now().plusSeconds(3600),
                 Instant.now(), "Appointment notes for Doctor 1", ReservationStatus.CONFIRMED, visit1, location1);
-        Appointment appointment2 = new Appointment("patient@example.com", doctor1.getEmail(), Instant.now().plusSeconds(7200),
+        Appointment appointment2 = new Appointment("fabiocinicolo@gmail.com", doctor1.getEmail(), Instant.now().plusSeconds(7200),
                 Instant.now(), "Appointment notes for Doctor 2", ReservationStatus.CONFIRMED, visit2, location2);
         Appointment a = appointmentRepository.save(appointment1);
         Appointment b = appointmentRepository.save(appointment2);
 
         // Initialize reviews
-        Review review1 = new Review("Great experience with Doctor 1!", "Highly recommend Doctor 1.", ReviewStars.FIVE, "patient@example.com", a.getId());
-        Review review2 = new Review("Great experience with Doctor 2!", "Highly recommend Doctor 2.", ReviewStars.FOUR, "patient@example.com", b.getId());
+        Review review1 = new Review("Great experience with Doctor 1!", "Highly recommend Doctor 1.", ReviewStars.FIVE, "fabiocinicolo@gmail.com", a.getId());
+        Review review2 = new Review("Great experience with Doctor 2!", "Highly recommend Doctor 2.", ReviewStars.FOUR, "fabiocinicolo@gmail.com", b.getId());
 
         reviewRepository.saveAll(Arrays.asList(review1, review2));
 
@@ -102,11 +101,11 @@ public class MongoInitializer implements CommandLineRunner {
     }
 
     private void printData(){
-        log.info("{}", appointmentRepository.findAll());
-        log.info("{}", reviewRepository.findAll());
-        log.info("{}", doctorRepository.findAll());
-        log.info("{}", contactInfoRepository.findAll());
-        log.info("{}", locationRepository.findAll());
-        log.info("{}", visitRepository.findAll());
+        log.info("APPOINTMENTS: {}", appointmentRepository.findAll());
+        log.info("REVIEWS: {}", reviewRepository.findAll());
+        log.info("DOCTORS: {}", doctorRepository.findAll());
+        log.info("CONTACT INFO: {}", contactInfoRepository.findAll());
+        log.info("LOCATION REPOSITORY: {}", locationRepository.findAll());
+        log.info("VISIT REPOSITORY: {}", visitRepository.findAll());
     }
 }

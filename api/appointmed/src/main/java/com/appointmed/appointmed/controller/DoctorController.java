@@ -9,10 +9,12 @@ import com.appointmed.appointmed.service.EmailService;
 import com.appointmed.appointmed.service.UserService;
 import com.appointmed.appointmed.util.HtmlTemplateGenerator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,7 +25,6 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Manage doctors.")
-
 @RequestMapping("/api/doctor")
 public class DoctorController {
 
@@ -58,9 +59,11 @@ public class DoctorController {
 
     @Operation(
             summary = "Adds a doctor.",
-            description = "An admin can add a doctor to the system. Personal data along with appointments data is required."
+            description = "An admin can add a doctor to the system. Personal data along with appointments data is required.",
+            security = {@SecurityRequirement(name = "AuthorizationHeader")}
     )
     @PostMapping
+    @PreAuthorize("hasRole('APPOINTMED_ADMIN')")
     public void addDoctor(@RequestBody DoctorDto doctorDto) {
         String temporaryPassword = userService.addUser(doctorDto.getName(), doctorDto.getSurname(), doctorDto.getEmail(),
                 doctorDto.getAttributes(), new String[]{"APPOINTMED_DOCTOR"});

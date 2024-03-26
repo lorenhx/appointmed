@@ -1,5 +1,7 @@
 package com.appointmed.appointmed.init;
 
+import com.appointmed.appointmed.config.secrets.GoogleSecrets;
+import com.appointmed.appointmed.config.secrets.SMTPSecrets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
@@ -8,6 +10,7 @@ import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -15,14 +18,16 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@EnableConfigurationProperties({GoogleSecrets.class, SMTPSecrets.class})
 public class KeycloakInitializer implements CommandLineRunner {
 
     private final Keycloak keycloak;
 
+    private final GoogleSecrets googleSecrets;
+
+    private final com.appointmed.appointmed.config.secrets.SMTPSecrets SMTPSecrets;
     private final String REALM_NAME = "appointmed";
-
     private final String CLIENT_ID = "oauth2-appointmed";
-
     private final List<String> CLIENT_ROLES = Arrays.asList("APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN");
 
     @Override
@@ -88,12 +93,21 @@ public class KeycloakInitializer implements CommandLineRunner {
         realmEmailConfig.put("from", emailFrom);
         String emailUsername = "appointmed@outlook.it";
         realmEmailConfig.put("user", emailUsername);
-        String emailPassword = "";
+        String emailPassword = SMTPSecrets.getPassword();
         realmEmailConfig.put("password", emailPassword);
         realm.setSmtpServer(realmEmailConfig);
         realm.setLoginTheme("keywind");
 
+        //At least one upper case English letter, (?=.*?[A-Z])
+        //At least one lower case English letter, (?=.*?[a-z])
+        //At least one digit, (?=.*?[0-9])
+        //At least one special character, (?=.*?[#?!@$%^&*-])
+        //Minimum eight in length .{8,}
+        String passwordPolicy = "regexPattern(^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$)";
+        realm.setPasswordPolicy(passwordPolicy);
+
         keycloak.realms().create(realm);
+
         log.info("Realm '{}' created!", REALM_NAME);
     }
 
@@ -141,9 +155,9 @@ public class KeycloakInitializer implements CommandLineRunner {
         // Configure Google Identity Provider
         Map<String, String> config = new HashMap<>();
         // Define Google identity provider details
-        String googleClientId = "";
+        String googleClientId = "891104114207-j7ae61qh56r1n62afm8tlnq08lattueb.apps.googleusercontent.com";
         config.put("clientId", googleClientId);
-        String googleSecret = "";
+        String googleSecret = googleSecrets.getOauth2ClientSecret();
         config.put("clientSecret", googleSecret);
         googleIdp.setConfig(config);
 
@@ -201,10 +215,10 @@ public class KeycloakInitializer implements CommandLineRunner {
         doctorAttributes.put("taxId", Collections.singletonList("987654321"));
         doctorAttributes.put("phoneNumber", Collections.singletonList("987654321"));
         doctorAttributes.put("imageLink", Collections.singletonList("http://example.com/image.jpg"));
-        addUser(REALM_NAME, "Patient", "One", "patient@example.com", "password", patientAttributes, new String[]{"APPOINTMED_PATIENT"});
-        addUser(REALM_NAME, "Doctor", "Two", "doctor@example.com", "password", doctorAttributes, new String[]{"APPOINTMED_DOCTOR"});
-        addUser(REALM_NAME, "Admin", "Three", "admin@example.com", "password" ,new HashMap<>(), new String[]{"APPOINTMED_ADMIN"});
-        addUser(REALM_NAME, "Fabio", "Cinicolo", "fabiocinicolo@gmail.com", "password", doctorAttributes, new String[]{"APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN"});
+        addUser(REALM_NAME, "Patient", "One", "patient@example.com", "P@ssw0rd", patientAttributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM_NAME, "Doctor", "Two", "doctor@example.com", "P@ssw0rd", doctorAttributes, new String[]{"APPOINTMED_DOCTOR"});
+        addUser(REALM_NAME, "Admin", "Three", "admin@example.com", "P@ssw0rd" ,new HashMap<>(), new String[]{"APPOINTMED_ADMIN"});
+        addUser(REALM_NAME, "Fabio", "Cinicolo", "fabiocinicolo@gmail.com", "P@ssw0rd", doctorAttributes, new String[]{"APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN"});
         log.info("Successfully populated users!");
     }
 

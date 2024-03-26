@@ -44,7 +44,7 @@ public class AppointmentController {
 
     @Operation(
             summary = "Creates appointment in PENDING state.",
-            description = "A doctor can create an appointment. The appointment will be persisted on the database and a confirmation email will be sent to the patient.",
+            description = "A patient can create an appointment. The appointment will be persisted on the database and a confirmation email will be sent to the patient.",
             security = {@SecurityRequirement(name = "AuthorizationHeader")})
     @PostMapping()
     @PreAuthorize("hasRole('APPOINTMED_PATIENT')")

@@ -2,11 +2,10 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:22.0.1
     container_name: keycloak
-    command: ["start-dev"]  # Specify the command to start Keycloak in development mode
+    command: ["start-dev"] 
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - DB_VENDOR=mongodb
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
     volumes:
       - ./theme:/opt/keycloak/themes
     ports:
@@ -15,5 +14,23 @@ services:
   mongodb:
     image: mongo
     container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_APP_USERNAME=${MONGO_APP_USERNAME}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+    volumes:
+      - "./mongodb/:/docker-entrypoint-initdb.d/"
+    command: [--auth]
     ports:
       - "27017:27017"
+
+  vault:
+    image: vault:1.13.3
+    container_name: dev-vault
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_DEV_ROOT_TOKEN_ID}
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK

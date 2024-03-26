@@ -78,7 +78,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment appointment = optionalAppointment.get();
         if (!appointment.getDoctorEmail().equals(Oauth2TokenIntrospection.extractEmail()))
-            throw new IDORException("You are trying to access a resource you do not own!");
+            throw new IDORException("You are trying to access an appointment you do not own!");
 
         appointment.setStatus(status);
         appointment.setNotes(notes);
