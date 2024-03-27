@@ -40,6 +40,7 @@ public class DoctorController {
     @GetMapping()
     public DoctorListDataDto getDoctorListData(@RequestParam List<Specialization> specializations, @RequestParam String location, @RequestParam int range) {
 
+        System.out.println(specializations);
         List<DoctorDto> doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
 
         System.out.println(doctors);

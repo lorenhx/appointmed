@@ -7,7 +7,6 @@ const ReviewContainer = ({
   rating,
   profilePhoto,
   mainSpecialization,
-  reviewCount,
 }) => {
   const renderStars = (rating) => {
     const stars = [];
@@ -36,11 +35,11 @@ const ReviewContainer = ({
       <div className="w-2/3 ml-4">
         <h2 className="text-lg font-semibold">{name}</h2>
         <div className="flex flex-wrap mt-1 italic text-gray-500">
+          <p className="mr-2">xxx</p>
           <p className="mr-2">{mainSpecialization}</p>
         </div>
         <div className="flex mt-1">{renderStars(rating)}</div>
         <div className="flex flex-wrap mt-1 italic text-gray-500">
-          <p>{reviewCount} reviews</p> 
         </div>
       </div>
     </div>

@@ -17,5 +17,6 @@ public class DoctorDto extends UserDto {
     private Specialization[] specializations;
     private List<LocationDto> locations;
     private List<ReviewDto> reviews;
+    private int reviewsNumber;
 
 }

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { useKeycloak } from '@react-keycloak/web';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { keycloak } = useKeycloak();
   const isAuthenticated = keycloak.authenticated;
 
@@ -23,42 +22,52 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    if(isAuthenticated)
-      navigate('/home')
-    else
-      keycloak.login()
-  }
+    keycloak.login();
+  };
+
   const handleRegisterClick = () => {
-    keycloak.register()
-  }
+    keycloak.register();
+  };
+
+  const handleLogoutClick = () => {
+    keycloak.logout();
+  };
+
   const handleHomeClick = () => {
-    navigate('/home')
-  }
+    navigate('/home');
+  };
 
   // Array containing navigation items
   const navItems = [
-    { id: 1, text: 'Home', onClick: handleHomeClick},
-    { id: 2, text: 'Register',onClick: handleRegisterClick },
-    { id: 3, text: 'Login', onClick: handleLoginClick},
-    { id: 4, text: 'Contact',onClick: null },
+    { id: 1, text: 'Home', onClick: handleHomeClick },
+    isAuthenticated
+      ? { id: 2, text: 'Logout', onClick: handleLogoutClick }
+      : { id: 2, text: 'Register', onClick: handleRegisterClick },
+    isAuthenticated
+      ? null
+      : { id: 3, text: 'Login', onClick: handleLoginClick },
+    { id: 4, text: 'Contacts', onClick: null },
   ];
 
   return (
-      <div className='bg-blue-700 flex justify-between items-center h-24 mx-auto px-4 text-white'>
-         {/* Logo */}
+    <div className='bg-blue-700 flex justify-between items-center h-24 mx-auto px-4 text-white'>
+      {/* Logo */}
       <h1 className='w-full text-3xl font-bold text-white'>APPOINTMED</h1>
 
       {/* Desktop Navigation */}
       <ul className='hidden md:flex'>
-        {navItems.map(item => (
-          <li
-            key={item.id}
-            className='p-4 hover:bg-blue-500 rounded-xl m-2 cursor-pointer duration-300 hover:text-black'
-            onClick={item.onClick} // Add onClick event
-          >
-            {item.text}
-          </li>
-        ))}
+        {navItems.map(
+          (item) =>
+            item && (
+              <li
+                key={item.id}
+                className='p-4 hover:bg-blue-500 rounded-xl m-2 cursor-pointer duration-300 hover:text-black'
+                onClick={item.onClick} // Add onClick event
+              >
+                {item.text}
+              </li>
+            )
+        )}
       </ul>
 
       {/* Mobile Navigation Icon */}
@@ -78,15 +87,18 @@ const Navbar = () => {
         <h1 className='w-full text-3xl font-bold text-white m-4'>APPOINTMED</h1>
 
         {/* Mobile Navigation Items */}
-        {navItems.map(item => (
-          <li
-            key={item.id}
-            className='p-4 border-b rounded-xl hover:bg-blue-500 duration-300 hover:text-black cursor-pointer border-white'
-            onClick={() => handleItemClick(item.text)} // Add onClick event
-          >
-            {item.text}
-          </li>
-        ))}
+        {navItems.map(
+          (item) =>
+            item && (
+              <li
+                key={item.id}
+                className='p-4 border-b rounded-xl hover:bg-blue-500 duration-300 hover:text-black cursor-pointer border-white'
+                onClick={() => handleItemClick(item.text)} // Add onClick event
+              >
+                {item.text}
+              </li>
+            )
+        )}
       </ul>
     </div>
   );

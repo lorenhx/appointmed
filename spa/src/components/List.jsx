@@ -10,7 +10,9 @@ const List = ({ items, onItemClick, label }) => {
           <li
             key={index}
             className="text-black mb-2 cursor-pointer transition-colors duration-300 hover:bg-blue-200"
-            onClick={() => onItemClick(index)}
+            onClick={() => onItemClick(index, item)}
+
+            
           >
             {item}
           </li>

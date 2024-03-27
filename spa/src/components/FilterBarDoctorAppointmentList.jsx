@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import SearchButton from "./SearchButton";
 import "react-datepicker/dist/react-datepicker.css";
 
-const FilterBar = ({ handleFilterChange }) => {
+const FilterBarDoctorAppointmentList = ({ handleFilterChange }) => {
   const [status, setStatus] = useState("");
   const [email, setEmail] = useState("");
   const [visitType, setVisitType] = useState("");
@@ -80,8 +80,7 @@ const FilterBar = ({ handleFilterChange }) => {
           onKeyDown={(e) => {
             e.preventDefault();
           }}
-          className="border rounded-md p-2"
-          wrapperClassName="border rounded-md p-2"
+          className="w-full border rounded-md p-2"
           calendarClassName="text-lg"
           placeholderText="Select start timestamp"
         />
@@ -96,8 +95,7 @@ const FilterBar = ({ handleFilterChange }) => {
           onKeyDown={(e) => {
             e.preventDefault();
           }}
-          className="border rounded-md p-2"
-          wrapperClassName="border rounded-md p-2"
+          className="w-full border rounded-md p-2"
           calendarClassName="text-lg"
           placeholderText="Select end timestamp"
         />
@@ -107,4 +105,4 @@ const FilterBar = ({ handleFilterChange }) => {
   );
 };
 
-export default FilterBar;
+export default FilterBarDoctorAppointmentList;

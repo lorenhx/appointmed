@@ -1,4 +1,8 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
+import List from "../components/List";
+import { useLocation } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
+
 import {
   createColumnHelper,
   flexRender,
@@ -7,82 +11,110 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
-import FilterBar from "./FilterBar";
-import List from "./List";
+import FilterBarDoctorList from "../components/FilterBarDoctorList";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
-
-const renderStars = (rating) => {
-  const stars = [];
-  for (let i = 0; i < 5; i++) {
-    stars.push(
-      <span key={i}>
-        <FontAwesomeIcon
-          icon={faStar}
-          className={i < rating ? "text-yellow-400" : "text-gray-400"}
-        />
-      </span>
-    );
-  }
-  return stars;
-};
-
-const handleFilterChange = () => {};
+import StarsRenderer from "../components/StarsRenderer";
 
 const columnHelper = createColumnHelper();
 
-const columns = [
-  columnHelper.accessor("Doctor Profile", {
-    cell: (info) => (
-      <div className="flex items-center">
-        <div className="flex-shrink-0 h-16 w-16">
-          <img
-            className="h-full w-full rounded-full"
-            src={info.row.original.reviewData.profilePhoto}
-            alt="Doctor"
+export default function DoctorList() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedLocation, setSelectedLocation] = useState();
+  const [selectedRow, setSelectedRow] = useState();
+  const [data, setData] = useState(
+    JSON.parse(localStorage.getItem("doctorListData"))
+  );
+
+  useEffect(() => {
+    if (location.state) {
+      setData(location.state);
+      localStorage.setItem("doctorListData", JSON.stringify(location.state));
+
+    }
+  }, []);
+
+  const handleSelectedLocation = (index, location) => {
+    setSelectedLocation({location:location, index:index})
+  }
+
+  const handleSelectedVisit = (doctors, visit) => {
+    const doctor = doctors[selectedRow]
+    const data = { visitType: visit.type,
+                   visitPrice: visit.price,
+                   visitId: visit.id,
+                   doctorName: doctor.name+" "+doctor.surname, 
+                   doctorEmail: doctor.email,
+                   doctorPhoneNumber: doctor.attributes.phoneNumber[0],
+                   locationAddress: selectedLocation.location.address,
+                   locationName: selectedLocation.location.name,
+                   contactInfo: selectedLocation.location.contactInfo[0]
+                   };
+    
+    navigate("/appointments/reservation", { state: data });
+    console.log(data)
+  }
+
+  const handleRowClick = (rowIndex) => {
+    setSelectedRow(rowIndex);
+  };
+
+  const columns = [
+    columnHelper.accessor("Doctor Profile", {
+      cell: (info) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-16 w-16">
+            <img
+              className="h-full w-full rounded-full"
+              src={info.row.original.attributes.imageLink[0]}
+              alt="Doctor Image here"
+            />
+          </div>
+          <div className="ml-4">
+            <div className="text-lg font-semibold text-gray-900 mb-2">
+              {info.row.original.name} {info.row.original.surname}
+            </div>
+            <div className="text-sm text-gray-700 mb-2">
+              {info.row.original.specializations[0]}
+            </div>
+            <div className="flex mt-1"><StarsRenderer reviews={info.row.original.reviews}></StarsRenderer></div>
+            <div className="text-sm text-gray-400 mb-2">
+              {info.row.original.reviewsNumber} reviews
+            </div>
+          </div>
+        </div>
+      ),
+    }),
+    columnHelper.accessor("Location", {
+      cell: (info) => (
+        <div>
+          <List
+            items={info.row.original.locations.map((loc) => loc.address)}
+            label={"Select location"}
+            onItemClick={(index) => handleSelectedLocation(index, info.row.original.locations[index])}
           />
         </div>
-        <div className="ml-4">
-          <div className="text-lg font-semibold text-gray-900 mb-2">
-            {info.row.original.reviewData.name}
-          </div>
-          <div className="text-sm text-gray-500 mb-2">
-            {info.row.original.reviewData.mainSpecialization}
-          </div>
-          <div className="flex mt-1">
-            {renderStars(info.row.original.reviewData.rating)}
-          </div>
+      ),
+    }),
+    columnHelper.accessor("Visit Types", {
+      cell: (info) => (
+        <div>
+          <List
+            items={
+              selectedLocation
+                ? selectedLocation.location.visits.map((visit) => visit.type)
+                : []
+            }
+            label={"Select visit"}
+            onItemClick={ (index) => handleSelectedVisit(data.doctors, info.row.original.locations[selectedLocation.index].visits[index])}
+          />
         </div>
-      </div>
-    ),
-  }),
-  columnHelper.accessor("Location", {
-    cell: (info) => (
-      <List
-        items={info.row.original.locations.map((loc) => loc.location)}
-        label={info.row.original.locationsLabel}
-        onItemClick={info.row.original.onItemClick}
-      />
-    ),
-  }),
-  columnHelper.accessor("Visit Types", {
-    cell: (info) => (
-      <List
-        items={info.row.original.strings}
-        label={info.row.original.visitsLabel}
-        onItemClick={info.row.original.onItemClick}
-      />
-    ),
-  }),
-];
-
-export default function AppointmentTable({ doctorData }) {
-  const [sorting, setSorting] = React.useState([]);
-  const [showPopup, setShowPopup] = React.useState(false);
+      ),
+    }),
+  ];
 
   const table = useReactTable({
-    data: doctorData,
+    data: data.doctors,
     columns,
     initialState: {
       pagination: {
@@ -94,17 +126,9 @@ export default function AppointmentTable({ doctorData }) {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const handleReserveClick = () => {
-    setShowPopup(true);
-  };
-
-  const handlePopupClose = () => {
-    setShowPopup(false);
-  };
-
   return (
-    <div className="container mx-auto flex h-screen py-24 gap-24">
-      <FilterBar handleFilterChange={handleFilterChange} />
+    <div className="container mx-auto flex h-max py-24 gap-24">
+      <FilterBarDoctorList filters={data.filters} />
       <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
         <table className="border w-full">
           <thead>
@@ -141,7 +165,7 @@ export default function AppointmentTable({ doctorData }) {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="bg-white">
+              <tr key={row.id} className="bg-white" onClick={() => handleRowClick(row.id)}>
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 pt-[14px] pb-[18px]">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -189,7 +213,6 @@ export default function AppointmentTable({ doctorData }) {
               <span className="w-5 h-5 text-white font-bold">{">>"}</span>
             </button>
           </div>
-          
         </div>
       </div>
     </div>

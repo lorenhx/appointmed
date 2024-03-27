@@ -5,10 +5,7 @@ import com.appointmed.appointmed.dto.UserDto;
 import com.appointmed.appointmed.exception.UserNotFound;
 import com.appointmed.appointmed.model.Doctor;
 import com.appointmed.appointmed.service.UserService;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -17,6 +14,7 @@ public abstract class DoctorMapper {
     @Autowired
     protected UserService userService;
 
+    @Mapping(target = "reviewsNumber", expression = "java(doctor.getReviews() != null ? doctor.getReviews().size() : 0)")
     public abstract DoctorDto doctorToDoctorDto(Doctor doctor);
 
     public abstract Doctor doctorDtoToDoctor(DoctorDto doctor);

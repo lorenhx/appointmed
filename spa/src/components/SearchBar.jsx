@@ -1,18 +1,22 @@
 import React, { useState } from "react";
 import Select from "react-tailwindcss-select";
 
-const SearchBar = ({ options, primaryColor, isMultiple, placeholder, isSearchable }) => {
+const SearchBar = ({ options, primaryColor, isMultiple, placeholder, isSearchable, handleSelectedValues }) => {
     const [selectedOption, setSelectedOption] = useState(null);
 
     const handleChange = (value) => {
+        handleSelectedValues(value);
         setSelectedOption(value);
     };
 
+    const optionsWithLabels = options.map(option => ({ value: option, label: option }));
+
+    
     return (
         <Select
             value={selectedOption}
             onChange={handleChange}
-            options={options}
+            options={optionsWithLabels}
             primaryColor={primaryColor}
             isMultiple={isMultiple}
             placeholder={placeholder}

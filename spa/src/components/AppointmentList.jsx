@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
-import FilterBar from "./FilterBar";
+import FilterBarDoctorAppointmentList from "./FilterBarDoctorAppointmentList";
 
 const columnHelper = createColumnHelper();
 
@@ -109,7 +109,7 @@ export default function App() {
   return (
     <div className="container mx-auto flex h-screen py-24 gap-24">
       {/* Filter bar */}
-      <FilterBar handleFilterChange={handleFilterChange} />
+      <FilterBarDoctorAppointmentList handleFilterChange={handleFilterChange} />
       <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
         <table className="border w-full">
           <thead>

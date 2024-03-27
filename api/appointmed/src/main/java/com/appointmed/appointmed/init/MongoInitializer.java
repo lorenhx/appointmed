@@ -43,9 +43,10 @@ public class MongoInitializer implements CommandLineRunner {
         // Initialize visits
         Visit visit1 = new Visit("Consultation", 100.0f, Specialization.DERMATOLOGIST, 30);
         Visit visit2 = new Visit("Routine Checkup", 150.0f, Specialization.CARDIOLOGIST, 45);
-        visitRepository.saveAll(Arrays.asList(visit1, visit2));
+        Visit visit3 = new Visit("Simple Checkup", 150.0f, Specialization.FAMILY_PHYSICIAN, 45);
+        visitRepository.saveAll(Arrays.asList(visit1, visit2, visit3));
 
-        List<Visit> visits = List.of(visit1, visit2);
+        List<Visit> visits = new java.util.ArrayList<>(List.of(visit1, visit2));
 
         // Initialize contact info
         ContactInfo contactInfo = new ContactInfo("123456789", "fabiocinicolo@gmail.com", "", "");
@@ -54,18 +55,20 @@ public class MongoInitializer implements CommandLineRunner {
         // Initialize locations
         Location location1 = new Location("Naples", "Doctor's Office 1", "9:00 AM - 5:00 PM",
                 Collections.singletonList(PaymentType.CASH), Collections.singletonList(Accessibility.HEARING_IMPAIRMENT), Collections.singletonList(contactInfo), visits);
-        Location location2 = new Location("Pozzuoli", "Doctor's Office 2", "10:00 AM - 6:00 PM",
-                Collections.singletonList(PaymentType.CREDIT_CARD), Collections.singletonList(Accessibility.PREGNANT), Collections.singletonList(contactInfo), visits);
-        location1.setVisits(Collections.singletonList(visit1));
-        location2.setVisits(Collections.singletonList(visit2));
-        locationRepository.saveAll(Arrays.asList(location1, location2));
+        locationRepository.save(location1);
+
+        List<Visit> visits2 = new java.util.ArrayList<>();
+        visits2.add(visit3);
+        Location location2 = new Location("Benevento, Italy", "Doctor's Office 2", "10:00 AM - 6:00 PM",
+                Collections.singletonList(PaymentType.CREDIT_CARD), Collections.singletonList(Accessibility.PREGNANT), Collections.singletonList(contactInfo), visits2);
+
+        locationRepository.save(location2);
 
         // Initialize doctors
         Doctor doctor1 = new Doctor("fabiocinicolo@gmail.com", null, Collections.singletonList(Specialization.DERMATOLOGIST),
-                Collections.singletonList(location1), Collections.emptyList());
-        Doctor doctor2 = new Doctor("fabiocinicolo@gmail.com", null, Collections.singletonList(Specialization.CARDIOLOGIST),
-                Collections.singletonList(location2), Collections.emptyList());
-        doctorRepository.saveAll(Arrays.asList(doctor1, doctor2));
+               List.of(location1, location2), Collections.emptyList());
+
+        doctorRepository.save(doctor1);
 
 
         // Initialize appointments

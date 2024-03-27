@@ -6,10 +6,7 @@ const SearchButton = ({ onSearch }) => {
 
   const handleClick = () => {
     setIsSpinning(true);
-    setTimeout(() => {
-      setIsSpinning(false);
-      onSearch();
-    }, 3000);
+    onSearch();
   };
 
   return (
