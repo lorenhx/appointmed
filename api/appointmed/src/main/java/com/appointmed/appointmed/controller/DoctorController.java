@@ -39,13 +39,8 @@ public class DoctorController {
             description = "A non-authenticated user can get a list of doctors for him to choose the visit from the preferred location.")
     @GetMapping()
     public DoctorListDataDto getDoctorListData(@RequestParam List<Specialization> specializations, @RequestParam String location, @RequestParam int range) {
-
-        System.out.println(specializations);
         List<DoctorDto> doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
-
-        System.out.println(doctors);
         String[] visitTypes = extractVisitTypes(doctors);
-
         return new DoctorListDataDto(new DoctorFiltersDto(visitTypes), doctors);
     }
 
