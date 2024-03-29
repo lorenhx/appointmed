@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { useKeycloak } from '@react-keycloak/web';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,11 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { keycloak } = useKeycloak();
   const isAuthenticated = keycloak.authenticated;
+  const hasDoctorRole =
+    isAuthenticated &&
+    keycloak.tokenParsed.resource_access?.['oauth2-appointmed']?.roles?.includes(
+      'APPOINTMED_DOCTOR'
+    );
 
   // State to manage the navbar's visibility
   const [nav, setNav] = useState(false);
@@ -17,8 +22,8 @@ const Navbar = () => {
   };
 
   // Handle click on a navigation item
-  const handleItemClick = (text) => {
-    alert(`Clicked on ${text}`);
+  const handleManageClick = () => {
+   navigate('/appointment/manage');
   };
 
   const handleLoginClick = () => {
@@ -37,7 +42,6 @@ const Navbar = () => {
     navigate('/home');
   };
 
-  // Array containing navigation items
   const navItems = [
     { id: 1, text: 'Home', onClick: handleHomeClick },
     isAuthenticated
@@ -46,7 +50,10 @@ const Navbar = () => {
     isAuthenticated
       ? null
       : { id: 3, text: 'Login', onClick: handleLoginClick },
-    { id: 4, text: 'Contacts', onClick: null },
+    hasDoctorRole
+      ? { id: 4, text: 'Manage', onClick: () => handleManageClick() }
+      : null,
+    { id: 5, text: 'Contacts', onClick: null },
   ];
 
   return (

@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 
 const StarsRenderer = ({reviews}) => {
+
+  if(reviews===null)
+    reviews = []
   const maxStars = 5;
 
   const totalStars = reviews.reduce((acc, review) => {
@@ -15,12 +18,8 @@ const StarsRenderer = ({reviews}) => {
   }, 0);
 
   const averageRating = reviews.length > 0 ? totalStars / reviews.length : 0;
-  console.log(averageRating)
 
   const filledStars = Math.min(Math.round(averageRating), maxStars);
-
-  console.log(filledStars)
-
 
   const stars = [];
   for (let i = 0; i < maxStars; i++) {

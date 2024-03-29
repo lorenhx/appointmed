@@ -6,24 +6,19 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/appointmed
+          issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_APPOINTMED_REALM}
   config:
     import: vault://
 
   cloud:
     vault:
-      uri: http://localhost:8200
+      uri: ${VAULT_URL}
       token: ${VAULT_TOKEN}
-
-keycloak:
-  realm: master
-  appointmed-realm: appointmed
-  clientId: oauth2-appointmed
 
 jwt:
   auth:
     converter:
-      resource-id: oauth2-appointmed
+      resource-id: ${KEYCLOAK_APPOINTMED_CLIENTID}
       principal-attribute: preferred_username
 
 app:
@@ -36,3 +31,25 @@ logging:
 
 server:
   port: 9080
+  error:
+    include-message: always
+
+custom-env:
+  keycloak:
+    url: ${KEYCLOAK_URL}
+    appointmed-realm: ${KEYCLOAK_APPOINTMED_REALM}
+    appointmed-clientId: ${KEYCLOAK_APPOINTMED_CLIENTID}
+
+  mongodb:
+    host: ${MONGODB_HOST}
+    port: ${MONGODB_PORT}
+    database: ${MONGODB_DATABASE}
+
+  smtp:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+
+  google:
+    oauth2:
+      clientId: ${GOOGLE_OAUTH2_CLIENTID}

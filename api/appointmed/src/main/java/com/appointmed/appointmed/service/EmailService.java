@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 public interface EmailService {
     void sendEmail(String from, String to, String subject, String body);
 
-    void sendHtmlEmail(String from, String to, String subject, String html) throws MessagingException;
+    void sendHtmlEmail(String from, String to, String subject, String html) throws MessagingException, MessagingException, MessagingException;
 
 }

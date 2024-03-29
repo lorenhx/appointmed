@@ -7,12 +7,10 @@ const FilterBarDoctorList = ({filters}) => {
 
   const { accessibilities, languages, paymentTypes, visitTypes } = filters
 
-  console.log(accessibilities)
-  console.log(filters)
 
   return (
     <div className="flex flex-col gap-5 h-max w-1/4  p-8 bg-gradient-to-b from-blue-600 to-blue-300">
-      <h2 className="text-lg text-white  font-semibold mb-4">Filter your results</h2>{" "}
+      <h2 className="text-lg text-white  font-semibold mb-4">Filter your results</h2>
       <SearchBar
         options={accessibilities}
         primaryColor={"blue"}

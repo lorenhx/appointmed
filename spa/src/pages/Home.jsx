@@ -13,23 +13,23 @@ const Home = () => {
   const [searchRange, setSearchRange] = useState(100); // Default range value is 100 km
 
   useEffect(() => {
-    axios.get("http://localhost:9080/api/doctor/specialization")
+    axios.get(`${import.meta.env.VITE_API_URL}/doctor/specialization`)
       .then(response => {
         setSpecializations(response.data);
       })
       .catch(error => {
-        console.error("Error fetching specializations:", error);
+        alert("Error fetching specializations, try again later.");
       });
   }, []);
   
   const onSearch = () => {
-    axios.get(`http://localhost:9080/api/doctor?specializations=${selectedSpecializations.join("&specializations=")}&location=${selectedLocation}&range=${searchRange}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/doctor?specializations=${selectedSpecializations.join("&specializations=")}&location=${selectedLocation}&range=${searchRange}`)
       .then(response => {
-        const data = { filters: response.data.filters, doctors: response.data.doctors };
-        navigate("/appointments", { state: data });
+        const data = { location: selectedLocation, filters: response.data.filters, doctors: response.data.doctors };
+        navigate("/doctor-list", { state: data });
       })
       .catch(error => {
-        console.error("Error fetching specializations:", error);
+        alert("Error fetching doctors, try again later.");
       });
   };
 
@@ -63,7 +63,7 @@ const Home = () => {
           <div className="w-1/2 mr-2">
             <GoogleSearch handleSelectedLocation={handleSelectedLocation}/>
           </div>
-          <div className="flex flex-col  mr-2 text-white"> {/* Changed to flex-col */}
+          <div className="flex flex-col  mr-2 text-white">
             <input
               type="range"
               min="1"
@@ -74,8 +74,8 @@ const Home = () => {
             <p>Search Range: {searchRange} km</p>
           </div>
         </div>
-        <div className="flex justify-center"> {/* Moved the button to a separate div for centering */}
-          <SearchButton onSearch={onSearch} /> {/* Centered the button horizontally */}
+        <div className="flex justify-center"> 
+          <SearchButton onSearch={onSearch} /> 
         </div>
       </div>
     </div>

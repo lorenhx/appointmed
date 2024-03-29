@@ -1,6 +1,7 @@
 package com.appointmed.appointmed.service.implementation;
 
 import com.appointmed.appointmed.constant.Specialization;
+import com.appointmed.appointmed.exception.LocationToCoordinatesException;
 import com.appointmed.appointmed.model.Doctor;
 import com.appointmed.appointmed.model.Location;
 import com.appointmed.appointmed.repository.DoctorRepository;
@@ -35,11 +36,13 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<Doctor> getDoctorsBySpecializationsAndLocationInRange(List<Specialization> specializations, String locationAddress, int range) {
+    public List<Doctor> getDoctorsBySpecializationsAndLocationInRange(List<Specialization> specializations, String locationAddress, int range) throws LocationToCoordinatesException {
         List<Doctor> doctorsFilteredBySpecialization = getDoctorsBySpecializations(specializations);
 
         try {
             LatLng locationCoordinates = getLocationCoordinates(locationAddress);
+            if(locationCoordinates==null)
+                throw new LocationToCoordinatesException("Could not find coordinates for location: "+locationAddress);
 
             List<Doctor> doctorsInRange = new ArrayList<>();
 
@@ -49,7 +52,8 @@ public class DoctorServiceImpl implements DoctorService {
                 for (Location location : doctor.getLocations()) {
 
                     LatLng targetLocationCoordinates = getLocationCoordinates(location.getAddress());
-
+                    if(targetLocationCoordinates==null)
+                        throw new LocationToCoordinatesException("Could not find coordinates for location: "+location.getAddress());
                     double distance = calculateDistance(locationCoordinates.lat, locationCoordinates.lng,
                             targetLocationCoordinates.lat, targetLocationCoordinates.lng);
 
@@ -88,6 +92,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     private LatLng getLocationCoordinates(String locationAddress) throws ApiException, InterruptedException, IOException {
         GeocodingResult[] locationResults = GeocodingApi.geocode(geoApiContext, locationAddress).await();
+        if (locationResults == null)
+            return null;
         return locationResults[0].geometry.location;
     }
 

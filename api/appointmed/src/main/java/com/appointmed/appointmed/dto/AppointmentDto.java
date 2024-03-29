@@ -10,6 +10,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class AppointmentDto {
 
+    private String id;
     private String visitType;
     private Instant startTimestamp;
     private Instant issuedTimestamp;
@@ -18,6 +19,7 @@ public class AppointmentDto {
     private float price;
     private String address;
     private PatientDto patient;
+    private String doctorEmail;
     private String notes;
 
 }

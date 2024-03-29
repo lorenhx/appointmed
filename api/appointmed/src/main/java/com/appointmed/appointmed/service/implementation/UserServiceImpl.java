@@ -27,7 +27,8 @@ public class UserServiceImpl implements UserService {
     private final String clientId;
     private final Keycloak keycloak;
 
-    public UserServiceImpl(@Value("${keycloak.appointmed-realm}") String realm, @Value("${keycloak.clientId}") String clientId, Keycloak keycloak) {
+    public UserServiceImpl(@Value("${custom-env.keycloak.appointmed-realm}") String realm,
+                           @Value("${custom-env.keycloak.appointmed-clientId}") String clientId, Keycloak keycloak) {
         this.realm = realm;
         this.clientId = clientId;
         this.keycloak = keycloak;

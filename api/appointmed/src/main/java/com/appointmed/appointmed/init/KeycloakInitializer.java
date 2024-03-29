@@ -9,6 +9,7 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -16,18 +17,37 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 @EnableConfigurationProperties({GoogleSecrets.class, SMTPSecrets.class})
 public class KeycloakInitializer implements CommandLineRunner {
 
     private final Keycloak keycloak;
-
     private final GoogleSecrets googleSecrets;
-
-    private final com.appointmed.appointmed.config.secrets.SMTPSecrets SMTPSecrets;
-    private final String REALM_NAME = "appointmed";
+    private final SMTPSecrets SMTPSecrets;
+    private final String SMTP_HOST;
+    private final int SMTP_PORT;
+    private final String SMTP_USERNAME;
+    private final String REALM;
     private final String CLIENT_ID = "oauth2-appointmed";
+    private final String GOOGLE_OAUTH2_CLIENTID;
+
+    public KeycloakInitializer(Keycloak keycloak, GoogleSecrets googleSecrets, SMTPSecrets SMTPSecrets,
+                               @Value("${custom-env.smtp.host}") String SMTP_HOST,
+                               @Value("${custom-env.smtp.port}") int SMTP_PORT,
+                               @Value("${custom-env.smtp.username}") String SMTP_USERNAME,
+                               @Value("${keycloak.appointmed-realm}") String REALM,
+                               @Value("${custom-env.google.oauth2.clientId}") String GOOGLE_OAUTH2_CLIENTID) {
+        this.keycloak = keycloak;
+        this.googleSecrets = googleSecrets;
+        this.SMTPSecrets = SMTPSecrets;
+        this.SMTP_HOST = SMTP_HOST;
+        this.SMTP_PORT = SMTP_PORT;
+        this.SMTP_USERNAME = SMTP_USERNAME;
+        this.REALM = REALM;
+        this.GOOGLE_OAUTH2_CLIENTID = GOOGLE_OAUTH2_CLIENTID;
+    }
+
+
     private final List<String> CLIENT_ROLES = Arrays.asList("APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN");
 
     @Override
@@ -41,7 +61,7 @@ public class KeycloakInitializer implements CommandLineRunner {
 
         createRealm();
 
-        RealmResource realmResource = keycloak.realm(REALM_NAME);
+        RealmResource realmResource = keycloak.realm(REALM);
 
         ClientRepresentation client = createClient(realmResource);
 
@@ -58,18 +78,18 @@ public class KeycloakInitializer implements CommandLineRunner {
         Optional<RealmRepresentation> representationOptional = keycloak.realms()
                 .findAll()
                 .stream()
-                .filter(r -> r.getRealm().equals(REALM_NAME))
+                .filter(r -> r.getRealm().equals(REALM))
                 .findAny();
         if (representationOptional.isPresent()) {
-            log.info("Removing already pre-configured '{}' realm", REALM_NAME);
-            keycloak.realm(REALM_NAME).remove();
+            log.info("Removing already pre-configured '{}' realm", REALM);
+            keycloak.realm(REALM).remove();
         }
     }
 
     private void createRealm() {
-        log.info("Creating realm '{}'...", REALM_NAME);
+        log.info("Creating realm '{}'...", REALM);
         RealmRepresentation realm = new RealmRepresentation();
-        realm.setRealm(REALM_NAME);
+        realm.setRealm(REALM);
         realm.setEnabled(true);
         realm.setRegistrationEmailAsUsername(true);
         realm.setRememberMe(true);
@@ -80,19 +100,15 @@ public class KeycloakInitializer implements CommandLineRunner {
 
         // Define email configuration
         Map<String, String> realmEmailConfig = new HashMap<>();
-        String emailHost = "smtp-mail.outlook.com";
-        realmEmailConfig.put("host", emailHost);
-        int emailPort = 587;
-        realmEmailConfig.put("port", String.valueOf(emailPort));
+        realmEmailConfig.put("host", SMTP_HOST);
+        realmEmailConfig.put("port", String.valueOf(SMTP_PORT));
         boolean emailStartTls = true;
         realmEmailConfig.put("starttls", String.valueOf(emailStartTls));
         realmEmailConfig.put("auth", "true");
         realmEmailConfig.put("ssl", "false");
         // Define email configuration
-        String emailFrom = "appointmed@outlook.it";
-        realmEmailConfig.put("from", emailFrom);
-        String emailUsername = "appointmed@outlook.it";
-        realmEmailConfig.put("user", emailUsername);
+        realmEmailConfig.put("from", SMTP_USERNAME);
+        realmEmailConfig.put("user", SMTP_USERNAME);
         String emailPassword = SMTPSecrets.getPassword();
         realmEmailConfig.put("password", emailPassword);
         realm.setSmtpServer(realmEmailConfig);
@@ -108,7 +124,7 @@ public class KeycloakInitializer implements CommandLineRunner {
 
         keycloak.realms().create(realm);
 
-        log.info("Realm '{}' created!", REALM_NAME);
+        log.info("Realm '{}' created!", REALM);
     }
 
     private ClientRepresentation createClient(RealmResource realmResource) {
@@ -117,10 +133,10 @@ public class KeycloakInitializer implements CommandLineRunner {
         ClientRepresentation client = new ClientRepresentation();
         client.setClientId(CLIENT_ID);
         client.setDirectAccessGrantsEnabled(true);
-        client.setRedirectUris(List.of("http://localhost:5173/*"));
-        client.setBaseUrl("http://localhost:5173/home");
+        client.setRedirectUris(List.of("http://localhost/*"));
+        client.setBaseUrl("http://localhost/home");
         client.setStandardFlowEnabled(true);
-        client.setRootUrl("http://localhost:5173/");
+        client.setRootUrl("http://localhost/");
         client.setWebOrigins(List.of("*"));
         client.setPublicClient(true);
 
@@ -155,8 +171,7 @@ public class KeycloakInitializer implements CommandLineRunner {
         // Configure Google Identity Provider
         Map<String, String> config = new HashMap<>();
         // Define Google identity provider details
-        String googleClientId = "891104114207-j7ae61qh56r1n62afm8tlnq08lattueb.apps.googleusercontent.com";
-        config.put("clientId", googleClientId);
+        config.put("clientId", GOOGLE_OAUTH2_CLIENTID);
         String googleSecret = googleSecrets.getOauth2ClientSecret();
         config.put("clientSecret", googleSecret);
         googleIdp.setConfig(config);
@@ -208,18 +223,65 @@ public class KeycloakInitializer implements CommandLineRunner {
 
     private void populateUsers(){
         log.info("Populating realm with default users...");
-        Map<String, List<String>> patientAttributes = new HashMap<>();
-        patientAttributes.put("taxId", Collections.singletonList("123456789"));
-        patientAttributes.put("phoneNumber", Collections.singletonList("123456789"));
-        Map<String, List<String>> doctorAttributes = new HashMap<>();
-        doctorAttributes.put("taxId", Collections.singletonList("987654321"));
-        doctorAttributes.put("phoneNumber", Collections.singletonList("987654321"));
-        doctorAttributes.put("imageLink", Collections.singletonList("http://example.com/image.jpg"));
-        addUser(REALM_NAME, "Patient", "One", "patient@example.com", "P@ssw0rd", patientAttributes, new String[]{"APPOINTMED_PATIENT"});
-        addUser(REALM_NAME, "Doctor", "Two", "doctor@example.com", "P@ssw0rd", doctorAttributes, new String[]{"APPOINTMED_DOCTOR"});
-        addUser(REALM_NAME, "Admin", "Three", "admin@example.com", "P@ssw0rd" ,new HashMap<>(), new String[]{"APPOINTMED_ADMIN"});
-        addUser(REALM_NAME, "Fabio", "Cinicolo", "fabiocinicolo@gmail.com", "P@ssw0rd", doctorAttributes, new String[]{"APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN"});
+
+        //Admin
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-0.jpeg"));
+        addUser(REALM, "Fabio", "Cinicolo", "fabiocinicolo@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN"});
+
+        //Patient
+        Map<String, List<String>> attributes1 = new HashMap<>();
+        attributes1.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes1.put("phoneNumber", Collections.singletonList("123456789"));
+        addUser(REALM, "Andrea", "Rossi", "evilpippozzo@gmail.com", "P@ssw0rd", attributes1, new String[]{"APPOINTMED_PATIENT"});
+
+        //Doctors
+        Map<String, List<String>> attributes2 = new HashMap<>();
+        attributes2.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes2.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes2.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-1.png"));
+        addUser(REALM, "Aniello", "Buonocore", "anibuonocore@gmail.com", "P@ssw0rd", attributes2, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes3 = new HashMap<>();
+        attributes3.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes3.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes3.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-2.png"));
+        addUser(REALM, "Giulia", "Esposito", "g_esposito@gmail.com", "P@ssw0rd", attributes3, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes4 = new HashMap<>();
+        attributes4.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes4.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes4.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-3.png"));
+        addUser(REALM, "Lorenzo", "Gallo", "lorenzo.gallo@gmail.com", "P@ssw0rd", attributes4, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes5 = new HashMap<>();
+        attributes5.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes5.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes5.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-4.png"));
+        addUser(REALM, "Sofia", "De Santis", "sant.sofia@gmail.com", "P@ssw0rd", attributes5, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes6 = new HashMap<>();
+        attributes6.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes6.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes6.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-5.png"));
+        addUser(REALM, "Antonio", "Ferrara", "ferrara.antonio@gmail.com", "P@ssw0rd", attributes6, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes7 = new HashMap<>();
+        attributes7.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes7.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes7.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-6.png"));
+        addUser(REALM, "Laura", "Rizzo", "rizzo.laura@gmail.com", "P@ssw0rd", attributes7, new String[]{"APPOINTMED_DOCTOR"});
+
+        Map<String, List<String>> attributes8 = new HashMap<>();
+        attributes8.put("taxId", Collections.singletonList("AKSDJ983703"));
+        attributes8.put("phoneNumber", Collections.singletonList("123456789"));
+        attributes8.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-profile-7.png"));
+        addUser(REALM, "Marco", "Conti", "marco.conti@gmail.com", "P@ssw0rd", attributes8, new String[]{"APPOINTMED_DOCTOR"});
+
         log.info("Successfully populated users!");
     }
 
 }
+

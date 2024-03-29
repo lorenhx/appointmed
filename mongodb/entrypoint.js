@@ -1,12 +1,12 @@
 db = db.getSiblingDB('appointmed')
 
 db.createUser({
-    user: process.env.MONGO_APP_USERNAME,
-    pwd: process.env.MONGO_APP_PASSWORD,
+    user: process.env.MONGO_APPOINTMED_USERNAME,
+    pwd: process.env.MONGO_APPOINTMED_PASSWORD,
     roles: [
       {
         role: 'dbOwner',
-      db: 'appointmed',
+        db: process.env.MONGO_APPOINTMED_DATABASE,
     },
   ],
 });

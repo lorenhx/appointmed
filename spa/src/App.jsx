@@ -7,14 +7,19 @@ import DoctorList from "./pages/DoctorList";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import "./Output.css";
 import AppointmentReservation from "./pages/AppointmentReservation";
-import AppointmentList from './components/AppointmentList'
+import AppointmentManage from "./pages/AppointmentManage";
 
 function App() {
   const keycloak = new Keycloak({
-    url: "http://localhost:8080",
-    realm: "appointmed",
-    clientId: "oauth2-appointmed",
+    url: `${import.meta.env.VITE_KEYCLOAK_URL}`,
+    realm: `${import.meta.env.VITE_KEYCLOAK_REALM}`,
+    clientId: `${import.meta.env.VITE_KEYCLOAK_CLIENT_ID}`,
   });
+
+  console.log(import.meta.env.VITE_KEYCLOAK_URL)
+  console.log(import.meta.env.VITE_KEYCLOAK_REALM)
+  console.log(import.meta.env.VITE_KEYCLOAK_CLIENT_ID)
+
   const initOptions = { pkceMethod: "S256" };
 
   const handleOnEvent = async (event, error) => {
@@ -23,123 +28,8 @@ function App() {
         console.log(keycloak.token);
       }
     } else {
-      console.log(event);
     }
   };
-
-  const doctorData = [
-    {
-      reviewData: {
-        name: "Johnny Bravo",
-        rating: 4,
-        profilePhoto: "/profile.jpg",
-        mainSpecialization: "Cardiologist",
-        reviewCount: 73,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    {
-      reviewData: {
-        name: "Andrea Rossi",
-        rating: 5,
-        profilePhoto: "/doctor3.jpg",
-        mainSpecialization: "Nutritionist",
-        reviewCount: 20,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    {
-      reviewData: {
-        name: "Antonio Russo",
-        rating: 2,
-        profilePhoto: "/profile.jpg",
-        mainSpecialization: "Nutritionist",
-        reviewCount: 17,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    {
-      reviewData: {
-        name: "Antonio Russo",
-        rating: 2,
-        profilePhoto: "/profile.jpg",
-        mainSpecialization: "Nutritionist",
-        reviewCount: 17,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    {
-      reviewData: {
-        name: "Antonio Russo",
-        rating: 2,
-        profilePhoto: "/profile.jpg",
-        mainSpecialization: "Nutritionist",
-        reviewCount: 17,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    {
-      reviewData: {
-        name: "Antonio Russo",
-        rating: 2,
-        profilePhoto: "/profile.jpg",
-        mainSpecialization: "Nutritionist",
-        reviewCount: 17,
-      },
-      locations: [
-        { location: "Via antonio 1", coordinates: [40.85, 14.26] },
-        { location: "via caspita2", coordinates: [40.852, 14.261] },
-        { location: "aaaaaaaaaaaaaaa", coordinates: [40.849, 14.259] },
-      ],
-      strings: ["Visita1  50$", "Visita2  100$", "Visita3  350$"],
-      locationsLabel: "Select location",
-      visitsLabel: "Select visit",
-      onItemClick: null,
-    },
-    
-
-    // Add more objects as needed...
-  ];
 
   return (
     <ReactKeycloakProvider
@@ -149,15 +39,17 @@ function App() {
       onEvent={(event, error) => handleOnEvent(event, error)}
     >
       <Router>
-        <div className="bg-[url('/doctor1.jpg')] bg-cover h-screen">
+        <div className="bg-[url('/background.jpg')] bg-cover h-screen">
           <Navbar />
           <Routes>
             <Route
-              path="/appointments/reservation"
-              element={<AppointmentReservation/>}/>
+              path="/appointment/reservation"
+              element={<AppointmentReservation />}
+            />
+            <Route path="/doctor-list" element={<DoctorList />} />
             <Route path="/home" element={<Home />} />
-            <Route path="/appointments" element={<DoctorList/>} />
-            <Route path="/manage" element={<AppointmentList/>} />
+            <Route path="/appointment/manage" element={<AppointmentManage />} />
+            <Route path="*" element={<Home />} />
           </Routes>
         </div>
       </Router>

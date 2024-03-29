@@ -10,6 +10,5 @@ import java.util.Map;
 @Service
 public interface UserService {
     UserDto getUserPersonalInfo(String email) throws UserNotFound;
-
     String addUser(String name, String surname, String email, Map<String, List<String>> attributes, String[] roles);
 }

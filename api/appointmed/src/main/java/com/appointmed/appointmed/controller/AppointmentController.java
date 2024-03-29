@@ -2,10 +2,7 @@ package com.appointmed.appointmed.controller;
 
 import com.appointmed.appointmed.constant.ReservationStatus;
 import com.appointmed.appointmed.dto.*;
-import com.appointmed.appointmed.exception.AppointmentNotFound;
-import com.appointmed.appointmed.exception.DoctorNotFound;
-import com.appointmed.appointmed.exception.IDORException;
-import com.appointmed.appointmed.exception.VisitNotFound;
+import com.appointmed.appointmed.exception.*;
 import com.appointmed.appointmed.mapper.AppointmentMapper;
 import com.appointmed.appointmed.mapper.ContactInfoMapper;
 import com.appointmed.appointmed.mapper.CreateAppointmentMapper;
@@ -41,7 +38,6 @@ public class AppointmentController {
     private final ContactInfoMapper contactInfoMapper;
     private final EmailService emailService;
 
-
     @Operation(
             summary = "Creates appointment in PENDING state.",
             description = "A patient can create an appointment. The appointment will be persisted on the database and a confirmation email will be sent to the patient.",
@@ -49,19 +45,20 @@ public class AppointmentController {
     @PostMapping()
     @PreAuthorize("hasRole('APPOINTMED_PATIENT')")
     public void createAppointment(@RequestBody CreateAppointmentDto createAppointmentDto) {
-        createAppointmentDto.setDoctorEmail(Oauth2TokenIntrospection.extractEmail());
         Appointment appointment = createAppointmentMapper.createAppointmentDtoToAppointment(createAppointmentDto);
         try {
             appointmentService.createAppointment(appointment);
             emailService.sendHtmlEmail("appointmed@outlook.it", createAppointmentDto.getPatientEmail(), "Appointmed pending reservation", HtmlTemplateGenerator.generateReservationPendingTemplate(createAppointmentDto.getAddress()));
         } catch (DoctorNotFound | VisitNotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (AppointmentAlreadyExists | IDORException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (MessagingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
         }
     }
 
-    @Operation(
+        @Operation(
             summary = "Updates appointment status.",
             description = "A doctor can confirm or reject an appointment.",
             security = {@SecurityRequirement(name = "AuthorizationHeader")})
@@ -72,7 +69,7 @@ public class AppointmentController {
         try {
             appointmentService.updateAppointmentStatus(appointmentId, status, updateAppointmentDto.getNotes());
             sendNotificationEmail(appointmentId, updateAppointmentDto);
-        } catch (AppointmentNotFound e) {
+        } catch (AppointmentNotFound | DoctorNotFound e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IDORException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
@@ -88,7 +85,7 @@ public class AppointmentController {
     @GetMapping
     @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
     public DoctorAppointmentListDataDto getDoctorAppointmentListData() {
-        List<Appointment> appointments = null;
+        List<Appointment> appointments;
         try {
             appointments = appointmentService.getAppointmentsByDoctorEmail(Oauth2TokenIntrospection.extractEmail());
         } catch (DoctorNotFound e) {
@@ -110,6 +107,7 @@ public class AppointmentController {
     public AppointmentAvailabilityDto getAppointmentAvailability(@RequestParam String visitType) {
         List<Appointment> appointments = appointmentService.getAppointmentsByVisitType(visitType);
 
+        System.out.println(visitType);
         int timeSlotMinutes = appointments.get(0).getVisit().getTimeSlotMinutes();
 
         List<Instant> timeSlotsTaken = appointments.stream()

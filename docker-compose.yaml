@@ -1,15 +1,72 @@
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
-    container_name: keycloak
-    command: ["start-dev"] 
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
+  appointmed-web-app:
+    container_name: appointmed-web-app
+    build:
+      context: ./spa
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_KEYCLOAK_URL=${VITE_KEYCLOAK_URL}
+        - VITE_GOOGLE_API_KEY=${VITE_GOOGLE_API_KEY}
+        - VITE_KEYCLOAK_REALM=${VITE_KEYCLOAK_REALM}
+        - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
+    ports:
+      - "80:80"
+
+  appointmed-api: 
+    container_name: appointmed-api 
+    restart: unless-stopped
+    build:
+      context: ./api/appointmed
+      args:
+        - VAULT_TOKEN=${VAULT_DEV_ROOT_TOKEN_ID}
+        - VAULT_URL=${VAULT_URL}
+        - KEYCLOAK_URL=${KEYCLOAK_URL}
+        - KEYCLOAK_APPOINTMED_REALM=${KEYCLOAK_APPOINTMED_REALM}
+        - KEYCLOAK_APPOINTMED_CLIENTID=${KEYCLOAK_APPOINTMED_CLIENTID}
+        - MONGODB_HOST=${MONGODB_HOST}
+        - MONGODB_PORT=${MONGODB_PORT}
+        - MONGODB_DATABASE=${MONGODB_DATABASE}
+        - SMTP_HOST=${SMTP_HOST}
+        - SMTP_PORT=${SMTP_PORT}
+        - SMTP_USERNAME=${SMTP_USERNAME}
+        - GOOGLE_OAUTH2_CLIENTID=${GOOGLE_OAUTH2_CLIENTID}
     volumes:
       - ./theme:/opt/keycloak/themes
     ports:
+      - "9080:9080"
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:22.0.1
+      environment:
+        KC_DB: postgres
+        KC_DB_URL: jdbc:postgresql://postgres-keycloak/${KEYCLOAK_DB_DATABASE}
+        KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
+        KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+        KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+        KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+        KC_HOSTNAME_STRICT: 'false'
+        KC_HOSTNAME_STRICT_HTTPS: 'false'
+        KC_METRICS_ENABLED: 'true'
+        KC_FEATURES: token-exchange
+        KC_HTTP_ENABLED: 'true'
+        PROXY_ADDRESS_FORWARDING: 'true'
+        KC_HOSTNAME_STRICT_BACKCHANNEL: 'false'
+      command:
+        - "start"
+        - "--auto-build"
+        - "--proxy=edge"
+      container_name: keycloak
+      ports:
       - "8080:8080"
+
+  postgres-keycloak:
+    image: postgres:latest
+    container_name: postgres-keycloak
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_DATABASE}
+      POSTGRES_USER: ${KEYCLOAK_DB_USERNAME}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    restart: unless-stopped
 
   mongodb:
     image: mongo
@@ -17,8 +74,9 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_APP_USERNAME=${MONGO_APP_USERNAME}
-      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - MONGO_APPOINTMED_USERNAME=${MONGO_APPOINTMED_USERNAME} 
+      - MONGO_APPOINTMED_PASSWORD=${MONGO_APPOINTMED_PASSWORD}   
+      - MONGO_APPOINTMED_DATABASE=${MONGODB_DATABASE}
     volumes:
       - "./mongodb/:/docker-entrypoint-initdb.d/"
     command: [--auth]
@@ -27,7 +85,7 @@ services:
 
   vault:
     image: vault:1.13.3
-    container_name: dev-vault
+    container_name: vault
     environment:
       - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_DEV_ROOT_TOKEN_ID}
     ports:

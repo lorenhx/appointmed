@@ -8,84 +8,96 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
-import FilterBarDoctorAppointmentList from "./FilterBarDoctorAppointmentList";
+import FilterBarDoctorAppointmentList from "../components/FilterBarDoctorAppointmentList";
+import axios from "axios";
+import { useKeycloak } from "@react-keycloak/web";
 
 const columnHelper = createColumnHelper();
 
 const columns = [
-  columnHelper.accessor("visit type", {
-    cell: (info) => info.getValue(),
+  columnHelper.accessor("Visit Type", {
+    cell: (info) => info.row.original.visitType,
   }),
-  columnHelper.accessor("location", {
-    cell: (info) => info.getValue(),
+  columnHelper.accessor("Issued Timestamp", {
+    cell: (info) =>
+      new Date(info.row.original.issuedTimestamp).toLocaleString("it-IT", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
   }),
-  columnHelper.accessor("price", {
-    cell: (info) => info.getValue(),
+  columnHelper.accessor("Start Timestamp", {
+    cell: (info) =>
+      new Date(info.row.original.startTimestamp).toLocaleString("it-IT", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
   }),
-  columnHelper.accessor("patient info", {
-    cell: (info) => info.renderValue(),
+  columnHelper.accessor("Duration", {
+    cell: (info) => `${info.row.original.timeSlotMinutes} min`,
   }),
-  columnHelper.accessor("status", {
-    // Add status column
-    cell: (info) => info.getValue(),
+  columnHelper.accessor("Status", {
+    cell: (info) => info.row.original.status,
   }),
-  columnHelper.accessor("timestamp+timeslot", {
-    // Add timestamp+timeslot column
-    cell: (info) => info.getValue(),
+  columnHelper.accessor("Price", {
+    cell: (info) => info.row.original.price,
+  }),
+  columnHelper.accessor("Address", {
+    cell: (info) => info.row.original.address,
+  }),
+  columnHelper.accessor("Patient Name", {
+    cell: (info) =>
+      `${info.row.original.patient.name} ${info.row.original.patient.surname}`,
   }),
 ];
 
-const data = [
-  {
-    "visit type": "Type A",
-    location: "Location A",
-    price: "$100",
-    "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "PENDING ⏳",
-    "timestamp+timeslot": "30 min",
-  },
-  {
-    "visit type": "Type A",
-    location: "Location A",
-    price: "$100",
-    "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "CONFIRMED ✔️",
-    "timestamp+timeslot": "1h",
-  },
-  {
-    "visit type": "Type A",
-    location: "Location A",
-    price: "$100",
-    "patient info": "John Doe, johndoe@example.com, 123-456-7890",
-    status: "REJECTED ❌",
-    "timestamp+timeslot": "1h30",
-  },
-  // Add more data as needed
-];
-
-export default function App() {
-  const [sorting, setSorting] = React.useState([]);
+export default function AppointmentManage() {
+  // const [sorting, setSorting] = React.useState([]);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [showPopup, setShowPopup] = React.useState(false);
+  const [appointments, setAppointments] = React.useState([]); // State to store fetched appointments
+  const [notes, setNotes] = React.useState(""); // State to store notes
+  const [status, setStatus] = React.useState(""); // State to store status\
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { keycloak } = useKeycloak();
+
   const handleFilterChange = (filter) => {
-    // Implement filtering logic here
-    console.log("Filter:", filter);
   };
 
+  React.useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/appointment`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`, 
+        },
+      })
+      .then((response) => {
+        setAppointments(response.data.appointments);
+      })
+      .catch((error) => {
+        alert("Error fetching appointments, try again later.");
+      });
+  }, []);
+
   const table = useReactTable({
-    data,
+    data: appointments,
     columns,
-    state: {
-      sorting,
-    },
+    // state: {
+    //   sorting,
+    // },
     initialState: {
       pagination: {
-        pageSize: 4,
+        pageSize: 5,
       },
     },
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    // onSortingChange: setSorting,
+    // getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
@@ -94,20 +106,59 @@ export default function App() {
   };
 
   const handleConfirmClick = () => {
+    setStatus("CONFIRMED");
     setShowPopup(true);
   };
 
   const handleRejectClick = () => {
-    setShowPopup(true);
+    setStatus("REJECTED");
+    setShowPopup(true); 
   };
 
   const handlePopupClose = () => {
     setShowPopup(false);
-    setSelectedRow(null); 
+    setSelectedRow(null);
   };
 
+  const handleSubmitClick = () => {
+    setIsLoading(true);
+
+    const body = {
+      notes: notes,
+      status: status,
+    };
+
+
+    axios
+      .patch(
+        `${import.meta.env.VITE_API_URL}/appointment/${selectedRow.original.id}`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`, 
+          },
+        }
+      )
+      .then((response) => {
+        if (status === "CONFIRMED") {
+          selectedRow.original.status = "CONFIRMED";
+          alert(`Appointment successfully confirmed`);
+        } else {
+          selectedRow.original.status = "REJECTED";
+          alert(`Appointment successfully rejected`);
+        }
+
+        setShowPopup(false);
+      })
+      .catch((error) => {
+        alert(`${error.response.data.message}`);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
   return (
-    <div className="container mx-auto flex h-screen py-24 gap-24">
+    <div className="container mx-auto flex h-max py-24 gap-24">
       {/* Filter bar */}
       <FilterBarDoctorAppointmentList handleFilterChange={handleFilterChange} />
       <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
@@ -120,7 +171,7 @@ export default function App() {
               >
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 pr-2 py-4  text-left">
-                    {header.isPlaceholder ? null : (
+                    {/* {header.isPlaceholder ? null : (
                       <div
                         {...{
                           className: header.column.getCanSort()
@@ -128,17 +179,17 @@ export default function App() {
                             : "",
                           onClick: header.column.getToggleSortingHandler(),
                         }}
-                      >
+                      > */}
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                        {{
+                        {/* {{
                           asc: <span className="pl-2">↑</span>,
                           desc: <span className="pl-2">↓</span>,
                         }[header.column.getIsSorted()] ?? null}
                       </div>
-                    )}
+                    )} */}
                   </th>
                 ))}
               </tr>
@@ -161,8 +212,8 @@ export default function App() {
           </tbody>
         </table>
 
-        <div className="flex justify-center w-full mt-8">
-          <div className="flex gap-2">
+        <div className="w-full mt-8">
+          <div className="flex gap-2 ">
             <button
               className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
               onClick={() => table.setPageIndex(0)}
@@ -184,7 +235,6 @@ export default function App() {
               {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </span>
-
             <button
               className="hover:bg-blue-500 hover:cursor-pointer rounded-lg bg-blue-700 p-1 h-8"
               onClick={() => table.nextPage()}
@@ -200,21 +250,19 @@ export default function App() {
               <span className="w-5 h-5 text-white font-bold">{">>"}</span>
             </button>
           </div>
-          <div className="flex justify-center w-full mt-8">
-            <div className="flex justify-center mt-4">
-              <button
-                className="bg-green-500 text-white font-semibold px-6 py-3 rounded-md mr-4 hover:bg-green-300"
-                onClick={handleConfirmClick}
-              >
-                Confirm
-              </button>
-              <button
-                className="bg-red-500 text-white font-semibold px-6 py-3 rounded-md hover:bg-red-300"
-                onClick={handleRejectClick}
-              >
-                Reject
-              </button>
-            </div>
+          <div className="flex justify-center w-full">
+            <button
+              className="bg-green-500 text-white font-semibold px-6 py-3 rounded-md mr-4 hover:bg-green-300"
+              onClick={handleConfirmClick}
+            >
+              Confirm
+            </button>
+            <button
+              className="bg-red-500 text-white font-semibold px-6 py-3 rounded-md hover:bg-red-300"
+              onClick={handleRejectClick}
+            >
+              Reject
+            </button>
           </div>
         </div>
       </div>
@@ -226,19 +274,48 @@ export default function App() {
             <textarea
               className="w-full h-32 border rounded-md p-2 mb-4"
               placeholder="Insert notes here..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             ></textarea>
             <div className="flex justify-end">
               <button
                 className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-md mr-4"
-                onClick={() => handlePopupClose()} // Close popup and reset selected row
+                onClick={() => handlePopupClose()}
               >
-                Cancel
+                Close
               </button>
               <button
                 className="bg-green-500 text-white font-semibold px-6 py-3 rounded-md"
-                onClick={() => handlePopupClose()} // Close popup and reset selected row
+                onClick={() => handleSubmitClick()}
+                disabled={isLoading}
               >
-                Submit
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <span className="mr-2">Submitting...</span>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </div>
+                ) : (
+                  "Submit"
+                )}
               </button>
             </div>
           </div>

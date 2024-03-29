@@ -9,19 +9,17 @@ const GoogleSearch = ({handleSelectedLocation}) => {
 
   const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } =
     useGoogle({
-      apiKey: "",
+      apiKey: `${import.meta.env.VITE_GOOGLE_API_KEY}`,
       sessionToken: false,
       debounce: "500",
     });
 
   useEffect(() => {
-    console.log(placePredictions)
     if (!isPlacePredictionsLoading && placePredictions) {
       let predictions = placePredictions.map((result) => ({
         value: result.description,
         label: `📍 ${result.description}`,
       }));
-      console.log(predictions)
       setLocations(predictions);
     }
   }, [isPlacePredictionsLoading]);
@@ -32,7 +30,6 @@ const GoogleSearch = ({handleSelectedLocation}) => {
       onSearchInputChange={(e) => {
         getPlacePredictions({ input: e.target.value });
         setText(e.target.value);
-        console.log(e.target.value);
       }}
       onChange={(value) => {
         handleSelectedLocation(value.value)

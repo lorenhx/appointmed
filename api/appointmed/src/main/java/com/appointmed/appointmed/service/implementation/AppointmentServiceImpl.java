@@ -1,10 +1,7 @@
 package com.appointmed.appointmed.service.implementation;
 
 import com.appointmed.appointmed.constant.ReservationStatus;
-import com.appointmed.appointmed.exception.AppointmentNotFound;
-import com.appointmed.appointmed.exception.DoctorNotFound;
-import com.appointmed.appointmed.exception.IDORException;
-import com.appointmed.appointmed.exception.VisitNotFound;
+import com.appointmed.appointmed.exception.*;
 import com.appointmed.appointmed.model.Appointment;
 import com.appointmed.appointmed.model.Doctor;
 import com.appointmed.appointmed.model.Location;
@@ -46,44 +43,61 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void createAppointment(Appointment appointment) throws VisitNotFound, DoctorNotFound {
+    public void createAppointment(Appointment appointment) throws VisitNotFound, DoctorNotFound, RuntimeException, AppointmentAlreadyExists, IDORException {
+        if(!appointment.getPatientEmail().equals(Oauth2TokenIntrospection.extractEmail()))
+            throw new IDORException("You are trying to create an appointment for another user!");
+        Doctor doctor = findDoctorByEmail(appointment.getDoctorEmail());
 
-        System.out.println(appointmentRepository.findAll());
-
-        Optional<Doctor> doctorOptional = doctorRepository.findById(appointment.getDoctorEmail());
-        if (doctorOptional.isEmpty())
-            throw new DoctorNotFound("Doctor with email " + appointment.getDoctorEmail() + " not found.");
-        Optional<Visit> visitOptional = visitRepository.findById(appointment.getVisit().getId());
+        Optional<Visit> visitOptional = findVisitById(appointment.getVisit().getId());
         if (visitOptional.isEmpty())
             throw new VisitNotFound("Could not create appointment because visit with id " + appointment.getVisit().getId() + " does not exist");
 
-        Doctor doctor = doctorOptional.get();
         Visit visit = visitOptional.get();
+
         Location matchingLocation = findMatchingLocation(doctor, appointment.getLocation().getAddress());
 
-        appointment.setVisit(visit);
-        appointment.setIssuedTimestamp(Instant.now());
-        appointment.setLocation(matchingLocation);
-        doctor.getAppointments().add(appointment);
+        validateNewAppointment(doctor, appointment);
 
-        System.out.println(appointmentRepository.save(appointment).getId());
+        setupNewAppointment(doctor, appointment, visit, matchingLocation);
+
+        saveDoctorAndAppointment(doctor, appointment);
+
+
+    }
+
+    private Optional<Visit> findVisitById(String visitId) {
+        return visitRepository.findById(visitId);
+    }
+
+    private void validateNewAppointment(Doctor doctor, Appointment newAppointment) throws RuntimeException, AppointmentAlreadyExists {
+        boolean appointmentExists = doctor.getAppointments().stream()
+                .anyMatch(existingAppointment ->
+                        existingAppointment.getVisit().getId().equals(newAppointment.getVisit().getId()) &&
+                                existingAppointment.getStartTimestamp().equals(newAppointment.getStartTimestamp()));
+
+        if (appointmentExists)
+            throw new AppointmentAlreadyExists("Appointment already exists");
+
+    }
+
+    private void setupNewAppointment(Doctor doctor, Appointment newAppointment, Visit visit, Location location) {
+        newAppointment.setVisit(visit);
+        newAppointment.setIssuedTimestamp(Instant.now());
+        newAppointment.setLocation(location);
+        doctor.getAppointments().add(newAppointment);
+    }
+
+    private void saveDoctorAndAppointment(Doctor doctor, Appointment appointment) {
+        appointmentRepository.save(appointment);
         doctorRepository.save(doctor);
     }
 
+
     @Override
-    public void updateAppointmentStatus(String id, ReservationStatus status, String notes) throws AppointmentNotFound, IDORException {
-        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
-        if (optionalAppointment.isEmpty())
-            throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exists.");
-
-        Appointment appointment = optionalAppointment.get();
-        if (!appointment.getDoctorEmail().equals(Oauth2TokenIntrospection.extractEmail()))
-            throw new IDORException("You are trying to access an appointment you do not own!");
-
-        appointment.setStatus(status);
-        appointment.setNotes(notes);
-        appointmentRepository.save(appointment);
-        System.out.println(appointmentRepository.findAll());
+    public void updateAppointmentStatus(String id, ReservationStatus status, String notes) throws AppointmentNotFound, IDORException, DoctorNotFound {
+        Appointment appointment = findAppointmentById(id);
+        validateOwnership(appointment);
+        updateAppointment(appointment, status, notes);
     }
 
     @Override
@@ -92,6 +106,46 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (optionalAppointment.isEmpty())
             throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exists.");
         return optionalAppointment.get();
+    }
+
+    private Appointment findAppointmentById(String id) throws AppointmentNotFound {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
+        if (optionalAppointment.isEmpty())
+            throw new AppointmentNotFound("Could not update status of appointment with id: " + id + " because it does not exist.");
+        return optionalAppointment.get();
+    }
+
+    private void validateOwnership(Appointment appointment) throws IDORException {
+        String doctorEmail = Oauth2TokenIntrospection.extractEmail();
+        if (!appointment.getDoctorEmail().equals(doctorEmail))
+            throw new IDORException("You are trying to access an appointment you do not own!");
+    }
+
+    private void updateAppointment(Appointment appointment, ReservationStatus status, String notes) throws DoctorNotFound {
+        appointment.setStatus(status);
+        appointment.setNotes(notes);
+        appointmentRepository.save(appointment);
+
+        Doctor doctor = findDoctorByEmail(Oauth2TokenIntrospection.extractEmail());
+        updateDoctorAppointment(doctor, appointment, status, notes);
+    }
+
+    private Doctor findDoctorByEmail(String email) throws DoctorNotFound {
+        Optional<Doctor> optionalDoctor = doctorRepository.findById(email);
+        if (optionalDoctor.isEmpty())
+            throw new DoctorNotFound("Doctor with email " + email + " not found.");
+        return optionalDoctor.get();
+    }
+
+    private void updateDoctorAppointment(Doctor doctor, Appointment appointment, ReservationStatus status, String notes) {
+        doctor.getAppointments().stream()
+                .filter(a -> a.getId().equals(appointment.getId()))
+                .findFirst()
+                .ifPresent(a -> {
+                    a.setStatus(status);
+                    a.setNotes(notes);
+                });
+        doctorRepository.save(doctor);
     }
 
     private Location findMatchingLocation(Doctor doctor, String address) {

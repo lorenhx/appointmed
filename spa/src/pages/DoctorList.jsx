@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import GoogleMap from "../components/GoogleMap"; // Import the GoogleMap component
 import List from "../components/List";
 import { useLocation } from "react-router-dom";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMapLocation } from "@fortawesome/free-solid-svg-icons";
 
 import {
   createColumnHelper,
@@ -12,7 +15,6 @@ import {
   getPaginationRowModel,
 } from "@tanstack/react-table";
 import FilterBarDoctorList from "../components/FilterBarDoctorList";
-
 import StarsRenderer from "../components/StarsRenderer";
 
 const columnHelper = createColumnHelper();
@@ -20,43 +22,56 @@ const columnHelper = createColumnHelper();
 export default function DoctorList() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedLocation, setSelectedLocation] = useState();
-  const [selectedRow, setSelectedRow] = useState();
+  const [selectedLocationIndex, setSelectedLocationIndex] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
   const [data, setData] = useState(
     JSON.parse(localStorage.getItem("doctorListData"))
   );
+  const [locationsForMap, setLocationsForMap] = useState([]);
+  const [showMap, setShowMap] = useState(false); // State to control map visibility
 
   useEffect(() => {
     if (location.state) {
       setData(location.state);
       localStorage.setItem("doctorListData", JSON.stringify(location.state));
-
     }
   }, []);
 
-  const handleSelectedLocation = (index, location) => {
-    setSelectedLocation({location:location, index:index})
-  }
 
-  const handleSelectedVisit = (doctors, visit) => {
-    const doctor = doctors[selectedRow]
-    const data = { visitType: visit.type,
-                   visitPrice: visit.price,
-                   visitId: visit.id,
-                   doctorName: doctor.name+" "+doctor.surname, 
-                   doctorEmail: doctor.email,
-                   doctorPhoneNumber: doctor.attributes.phoneNumber[0],
-                   locationAddress: selectedLocation.location.address,
-                   locationName: selectedLocation.location.name,
-                   contactInfo: selectedLocation.location.contactInfo[0]
-                   };
-    
-    navigate("/appointments/reservation", { state: data });
-    console.log(data)
-  }
-
-  const handleRowClick = (rowIndex) => {
+  const handleSelectedLocation = (rowIndex, locationIndex) => {
     setSelectedRow(rowIndex);
+    setSelectedLocationIndex(locationIndex);
+  };
+
+  const handleSelectedVisit = (visit) => {
+    const doctor = data.doctors[selectedRow];
+    const selectedLocation = doctor.locations[selectedLocationIndex];
+    const reservationData = {
+      visitType: visit.type,
+      visitPrice: visit.price,
+      visitId: visit.id,
+      doctorName: `${doctor.name} ${doctor.surname}`,
+      doctorEmail: doctor.email,
+      doctorPhoneNumber: doctor.attributes.phoneNumber[0],
+      locationAddress: selectedLocation.address,
+      locationName: selectedLocation.name,
+      contactInfo: selectedLocation.contactInfo[0],
+    };
+    navigate("/appointment/reservation", { state: reservationData });
+  };
+
+  const getLocationsForMap = () => {
+    const locations = [];
+    if (data && data.doctors) {
+      data.doctors.forEach((doctor) => {
+        if (doctor.locations) {
+          doctor.locations.forEach((location) => {
+            locations.push(location.address);
+          });
+        }
+      });
+    }
+    return locations;
   };
 
   const columns = [
@@ -77,7 +92,9 @@ export default function DoctorList() {
             <div className="text-sm text-gray-700 mb-2">
               {info.row.original.specializations[0]}
             </div>
-            <div className="flex mt-1"><StarsRenderer reviews={info.row.original.reviews}></StarsRenderer></div>
+            <div className="flex mt-1">
+              <StarsRenderer reviews={info.row.original.reviews} />
+            </div>
             <div className="text-sm text-gray-400 mb-2">
               {info.row.original.reviewsNumber} reviews
             </div>
@@ -91,7 +108,7 @@ export default function DoctorList() {
           <List
             items={info.row.original.locations.map((loc) => loc.address)}
             label={"Select location"}
-            onItemClick={(index) => handleSelectedLocation(index, info.row.original.locations[index])}
+            onItemClick={(index) => handleSelectedLocation(info.row.id, index)}
           />
         </div>
       ),
@@ -99,22 +116,28 @@ export default function DoctorList() {
     columnHelper.accessor("Visit Types", {
       cell: (info) => (
         <div>
-          <List
-            items={
-              selectedLocation
-                ? selectedLocation.location.visits.map((visit) => visit.type)
-                : []
-            }
-            label={"Select visit"}
-            onItemClick={ (index) => handleSelectedVisit(data.doctors, info.row.original.locations[selectedLocation.index].visits[index])}
-          />
+          {selectedRow === info.row.id && selectedLocationIndex !== null && (
+            <List
+              items={info.row.original.locations[
+                selectedLocationIndex
+              ].visits.map((visit) => visit.type)}
+              label={"Select visit"}
+              onItemClick={(index) =>
+                handleSelectedVisit(
+                  info.row.original.locations[selectedLocationIndex].visits[
+                    index
+                  ]
+                )
+              }
+            />
+          )}
         </div>
       ),
     }),
   ];
 
   const table = useReactTable({
-    data: data.doctors,
+    data: data === null ? location.state.doctors : data.doctors,
     columns,
     initialState: {
       pagination: {
@@ -126,10 +149,30 @@ export default function DoctorList() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const handleOpenLocationsOnMap = () => {
+    const locations = getLocationsForMap();
+    setLocationsForMap(locations);
+    setShowMap(true); // Show the map when button is clicked
+  };
+
+  const handleCloseMap = () => {
+    setShowMap(false); // Close the map when the close button is clicked
+  };
+
   return (
     <div className="container mx-auto flex h-max py-24 gap-24">
-      <FilterBarDoctorList filters={data.filters} />
+      <FilterBarDoctorList
+        filters={data === null ? location.state.filters : data.filters}
+      />
       <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
+        {/* Button to open locations on map */}
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+          onClick={handleOpenLocationsOnMap}
+        >
+          <FontAwesomeIcon icon={faMapLocation} />
+          <span>Open on map</span>
+        </button>
         <table className="border w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -165,7 +208,13 @@ export default function DoctorList() {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="bg-white" onClick={() => handleRowClick(row.id)}>
+              <tr
+                key={row.id}
+                className={`bg-white ${
+                  selectedRow === row.id ? "bg-gray-200" : ""
+                }`}
+                onClick={() => setSelectedRow(row.id)}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 pt-[14px] pb-[18px]">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -215,6 +264,20 @@ export default function DoctorList() {
           </div>
         </div>
       </div>
+      {/* Render the GoogleMap component with locations when button is clicked */}
+      {showMap && locationsForMap.length > 0 && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+          <button
+            className="absolute top-4 right-4 text-white bg-blue-700 px-5 py-5 rounded-md"
+            onClick={handleCloseMap}
+          >
+            Close
+          </button>
+          <div style={{ height: "800px", width: "50%" }}>
+            <GoogleMap center={data.location} locations={locationsForMap} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

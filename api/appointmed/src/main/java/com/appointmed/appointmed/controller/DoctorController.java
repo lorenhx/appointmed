@@ -3,6 +3,7 @@ package com.appointmed.appointmed.controller;
 
 import com.appointmed.appointmed.constant.Specialization;
 import com.appointmed.appointmed.dto.*;
+import com.appointmed.appointmed.exception.LocationToCoordinatesException;
 import com.appointmed.appointmed.mapper.DoctorMapper;
 import com.appointmed.appointmed.service.DoctorService;
 import com.appointmed.appointmed.service.EmailService;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,9 +39,13 @@ public class DoctorController {
             description = "A non-authenticated user can get a list of doctors for him to choose the visit from the preferred location.")
     @GetMapping()
     public DoctorListDataDto getDoctorListData(@RequestParam List<Specialization> specializations, @RequestParam String location, @RequestParam int range) {
-        List<DoctorDto> doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
-        String[] visitTypes = extractVisitTypes(doctors);
-        return new DoctorListDataDto(new DoctorFiltersDto(visitTypes), doctors);
+        List<DoctorDto> doctors;
+        try {
+            doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
+        } catch (LocationToCoordinatesException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return new DoctorListDataDto(new DoctorFiltersDto(extractVisitTypes(doctors)), doctors);
     }
 
     @Operation(
@@ -72,7 +76,7 @@ public class DoctorController {
         }
     }
 
-    private List<DoctorDto> getDoctorsBySpecializationsAndLocationInRange(List<Specialization> specializations, String location, int range) {
+    private List<DoctorDto> getDoctorsBySpecializationsAndLocationInRange(List<Specialization> specializations, String location, int range) throws LocationToCoordinatesException {
         return doctorService.getDoctorsBySpecializationsAndLocationInRange(specializations, location, range)
                 .stream()
                 .map(doctorMapper::doctorToDoctorDto)
