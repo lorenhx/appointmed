@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class GoogleMapsConfig {
 
     private final GoogleSecrets googleSecrets;
+
     @Bean
     public GeoApiContext createGeoApiContext() {
         return new GeoApiContext.Builder()

@@ -6,7 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_APPOINTMED_REALM}
+          issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_APPOINTMED_REALM} #http://keycloak:8080/realms/appointmed #http://localhost/realms/appointmed
   config:
     import: vault://
 
@@ -20,10 +20,6 @@ jwt:
     converter:
       resource-id: ${KEYCLOAK_APPOINTMED_CLIENTID}
       principal-attribute: preferred_username
-
-app:
-  cors:
-    allowed-origins: "*"
 
 logging:
   level:

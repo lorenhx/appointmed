@@ -48,6 +48,8 @@ const AppointmentReservationPage = () => {
         Authorization: `Bearer ${keycloak.token}`,
       };
 
+      console.log(keycloak.token)
+
       const requestData = {
         startTimestamp: selectedDate.toISOString(),
         visitId: data.visitId,
@@ -59,7 +61,7 @@ const AppointmentReservationPage = () => {
       setIsLoading(true);
 
       axios
-        .post(`${process.env.REACT_APP_API_URL}/appointment`, requestData, {
+        .post(`${import.meta.env.VITE_API_URL}/appointment`, requestData, {
           headers,
         })
         .then((response) => {

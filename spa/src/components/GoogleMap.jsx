@@ -12,7 +12,7 @@ const Marker = ({ lat, lng }) => (
     lng={lng}
   />
 );
-setKey(`${import.meta.env.VITE_GOOGLE_API_KEY}`); 
+setKey(import.meta.env.VITE_GOOGLE_API_KEY); 
 export default function GoogleMap({ center, locations }) {
   const [mapCenter, setMapCenter] = useState();
   const [markers, setMarkers] = useState([]);

@@ -1,7 +1,6 @@
 package com.appointmed.appointmed.config;
 
 import com.appointmed.appointmed.config.secrets.SMTPSecrets;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,11 +24,11 @@ public class SmtpClientConfig {
     private final SMTPSecrets smtpSecrets;
 
     public SmtpClientConfig(SMTPSecrets smtpSecrets, @Value("${custom-env.smtp.port}") int port,
-                            @Value("${custom-env.smtp.username}") String username, @Value("${custom-env.smtp.host}") String host){
-        this.HOST=host;
-        this.PORT=port;
-        this.smtpSecrets=smtpSecrets;
-        this.USERNAME=username;
+                            @Value("${custom-env.smtp.username}") String username, @Value("${custom-env.smtp.host}") String host) {
+        this.HOST = host;
+        this.PORT = port;
+        this.smtpSecrets = smtpSecrets;
+        this.USERNAME = username;
     }
 
     @Bean

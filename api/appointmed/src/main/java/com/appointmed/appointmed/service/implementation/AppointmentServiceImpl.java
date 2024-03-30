@@ -44,7 +44,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public void createAppointment(Appointment appointment) throws VisitNotFound, DoctorNotFound, RuntimeException, AppointmentAlreadyExists, IDORException {
-        if(!appointment.getPatientEmail().equals(Oauth2TokenIntrospection.extractEmail()))
+        if (!appointment.getPatientEmail().equals(Oauth2TokenIntrospection.extractEmail()))
             throw new IDORException("You are trying to create an appointment for another user!");
         Doctor doctor = findDoctorByEmail(appointment.getDoctorEmail());
 

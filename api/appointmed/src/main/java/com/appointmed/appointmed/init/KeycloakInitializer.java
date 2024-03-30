@@ -2,7 +2,6 @@ package com.appointmed.appointmed.init;
 
 import com.appointmed.appointmed.config.secrets.GoogleSecrets;
 import com.appointmed.appointmed.config.secrets.SMTPSecrets;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -30,6 +29,8 @@ public class KeycloakInitializer implements CommandLineRunner {
     private final String REALM;
     private final String CLIENT_ID = "oauth2-appointmed";
     private final String GOOGLE_OAUTH2_CLIENTID;
+    private final List<String> CLIENT_ROLES = Arrays.asList("APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN");
+
 
     public KeycloakInitializer(Keycloak keycloak, GoogleSecrets googleSecrets, SMTPSecrets SMTPSecrets,
                                @Value("${custom-env.smtp.host}") String SMTP_HOST,
@@ -46,9 +47,6 @@ public class KeycloakInitializer implements CommandLineRunner {
         this.REALM = REALM;
         this.GOOGLE_OAUTH2_CLIENTID = GOOGLE_OAUTH2_CLIENTID;
     }
-
-
-    private final List<String> CLIENT_ROLES = Arrays.asList("APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN");
 
     @Override
     public void run(String... args) {
@@ -74,7 +72,7 @@ public class KeycloakInitializer implements CommandLineRunner {
         log.info("Keycloak is successfully initialized!");
     }
 
-    private void deleteRealmIfExists(){
+    private void deleteRealmIfExists() {
         Optional<RealmRepresentation> representationOptional = keycloak.realms()
                 .findAll()
                 .stream()
@@ -95,7 +93,7 @@ public class KeycloakInitializer implements CommandLineRunner {
         realm.setRememberMe(true);
         realm.setRegistrationAllowed(true);
         realm.setResetPasswordAllowed(true);
-        realm.setAccessTokenLifespan(99999999);
+        realm.setAccessTokenLifespan(60);
         realm.setVerifyEmail(true);
 
         // Define email configuration
@@ -221,7 +219,7 @@ public class KeycloakInitializer implements CommandLineRunner {
         return roleRepresentations;
     }
 
-    private void populateUsers(){
+    private void populateUsers() {
         log.info("Populating realm with default users...");
 
         //Admin
@@ -231,12 +229,37 @@ public class KeycloakInitializer implements CommandLineRunner {
         attributes.put("imageLink", Collections.singletonList("https://storage.googleapis.com/appointmed-doctor-profile-image/doctor-0.jpeg"));
         addUser(REALM, "Fabio", "Cinicolo", "fabiocinicolo@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT", "APPOINTMED_DOCTOR", "APPOINTMED_ADMIN"});
 
-        //Patient
-        Map<String, List<String>> attributes1 = new HashMap<>();
-        attributes1.put("taxId", Collections.singletonList("AKSDJ983703"));
-        attributes1.put("phoneNumber", Collections.singletonList("123456789"));
-        addUser(REALM, "Andrea", "Rossi", "evilpippozzo@gmail.com", "P@ssw0rd", attributes1, new String[]{"APPOINTMED_PATIENT"});
-
+        //Patients
+        addUser(REALM, "Andrea", "Rossi", "evilpippozzo@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Andrea", "Rossi", "andrearossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Maria", "Rossi", "mariarossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giuseppe", "Verdi", "giuseppe.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Anna", "Bianchi", "annabianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Maria", "Rossi", "maria.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Luca", "Verdi", "luca.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Chiara", "Bianchi", "chiara.bianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Simone", "Gialli", "simone.gialli@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Ilaria", "Verdi", "ilaria.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Stefano", "Rossi", "stefano.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giovanna", "Verdi", "giovanna.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giorgio", "Bianchi", "giorgio.bianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Chiara", "Gialli", "chiara.gialli@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Mario", "Rossi", "mario.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giulio", "Rossi", "giulio.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Andrea", "Verdi", "andrea.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Anna", "Bianchi", "anna.bianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Michele", "Gialli", "michele.gialli@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giorgio", "Rossi", "giorgio.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Luca", "Rossi", "luca.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Alessia", "Verdi", "alessia.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Giovanni", "Bianchi", "giovanni.bianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Anna", "Gialli", "anna.gialli@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Marco", "Rossi", "marco.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Chiara", "Rossi", "chiara.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Luigi", "Verdi", "luigi.verdi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Marta", "Bianchi", "marta.bianchi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Paolo", "Gialli", "paolo.gialli@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
+        addUser(REALM, "Andrea", "Rossi", "andrea.rossi@gmail.com", "P@ssw0rd", attributes, new String[]{"APPOINTMED_PATIENT"});
         //Doctors
         Map<String, List<String>> attributes2 = new HashMap<>();
         attributes2.put("taxId", Collections.singletonList("AKSDJ983703"));

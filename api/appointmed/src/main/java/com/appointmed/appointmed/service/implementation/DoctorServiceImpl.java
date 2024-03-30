@@ -41,8 +41,8 @@ public class DoctorServiceImpl implements DoctorService {
 
         try {
             LatLng locationCoordinates = getLocationCoordinates(locationAddress);
-            if(locationCoordinates==null)
-                throw new LocationToCoordinatesException("Could not find coordinates for location: "+locationAddress);
+            if (locationCoordinates == null)
+                throw new LocationToCoordinatesException("Could not find coordinates for location: " + locationAddress);
 
             List<Doctor> doctorsInRange = new ArrayList<>();
 
@@ -52,8 +52,8 @@ public class DoctorServiceImpl implements DoctorService {
                 for (Location location : doctor.getLocations()) {
 
                     LatLng targetLocationCoordinates = getLocationCoordinates(location.getAddress());
-                    if(targetLocationCoordinates==null)
-                        throw new LocationToCoordinatesException("Could not find coordinates for location: "+location.getAddress());
+                    if (targetLocationCoordinates == null)
+                        throw new LocationToCoordinatesException("Could not find coordinates for location: " + location.getAddress());
                     double distance = calculateDistance(locationCoordinates.lat, locationCoordinates.lng,
                             targetLocationCoordinates.lat, targetLocationCoordinates.lng);
 

@@ -33,6 +33,7 @@ public class MongoDBConfig extends AbstractMongoClientConfiguration {
     protected String getDatabaseName() {
         return DATABASE;
     }
+
     @NotNull
     @Override
     public MongoClientSettings mongoClientSettings() {

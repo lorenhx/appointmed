@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
         UsersResource usersResource = realmResource.users();
         List<UserRepresentation> users = usersResource.searchByEmail(email, true);
         if (users.isEmpty())
-            throw new UserNotFound("User not found");
+            throw new UserNotFound("User not found " + email);
         UserRepresentation userRepresentation = users.get(0);
         return new UserDto(userRepresentation.getFirstName(), userRepresentation.getLastName(), email, userRepresentation.getAttributes());
     }

@@ -58,7 +58,7 @@ public class AppointmentController {
         }
     }
 
-        @Operation(
+    @Operation(
             summary = "Updates appointment status.",
             description = "A doctor can confirm or reject an appointment.",
             security = {@SecurityRequirement(name = "AuthorizationHeader")})

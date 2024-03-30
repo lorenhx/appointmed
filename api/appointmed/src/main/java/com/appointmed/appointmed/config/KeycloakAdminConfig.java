@@ -1,8 +1,6 @@
 package com.appointmed.appointmed.config;
 
 import com.appointmed.appointmed.config.secrets.KeycloakSecrets;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +14,10 @@ public class KeycloakAdminConfig {
 
     private final String URL;
     private final KeycloakSecrets keycloakSecrets;
-    public KeycloakAdminConfig( @Value("${custom-env.keycloak.url}") String url, KeycloakSecrets keycloakSecrets)
-    {
-        this.URL=url;
-        this.keycloakSecrets=keycloakSecrets;
+
+    public KeycloakAdminConfig(@Value("${custom-env.keycloak.url}") String url, KeycloakSecrets keycloakSecrets) {
+        this.URL = url;
+        this.keycloakSecrets = keycloakSecrets;
     }
 
     @Bean

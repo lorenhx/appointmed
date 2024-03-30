@@ -16,11 +16,8 @@ function App() {
     clientId: `${import.meta.env.VITE_KEYCLOAK_CLIENT_ID}`,
   });
 
-  console.log(import.meta.env.VITE_KEYCLOAK_URL)
-  console.log(import.meta.env.VITE_KEYCLOAK_REALM)
-  console.log(import.meta.env.VITE_KEYCLOAK_CLIENT_ID)
 
-  const initOptions = { pkceMethod: "S256" };
+  const initOptions = { pkceMethod: "S256", checkLoginIframe: false };
 
   const handleOnEvent = async (event, error) => {
     if (event === "onAuthSuccess") {

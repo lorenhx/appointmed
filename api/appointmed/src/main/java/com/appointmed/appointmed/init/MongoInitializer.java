@@ -1,10 +1,6 @@
 package com.appointmed.appointmed.init;
 
-import com.appointmed.appointmed.constant.Accessibility;
-import com.appointmed.appointmed.constant.PaymentType;
-import com.appointmed.appointmed.constant.ReservationStatus;
-import com.appointmed.appointmed.constant.Specialization;
-import com.appointmed.appointmed.constant.ReviewStars;
+import com.appointmed.appointmed.constant.*;
 import com.appointmed.appointmed.model.*;
 import com.appointmed.appointmed.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +69,7 @@ public class MongoInitializer implements CommandLineRunner {
                 visit6, visit7, visit8, visit9, visit10,
                 visit11, visit12, visit13, visit14, visit15,
                 visit16, visit17, visit18, visit19, visit20,
-                visit21, visit22, visit23, visit24, visit25,visit26, visit27, visit28));
+                visit21, visit22, visit23, visit24, visit25, visit26, visit27, visit28));
 
 
         // Initialize contact info
@@ -87,8 +83,7 @@ public class MongoInitializer implements CommandLineRunner {
         ContactInfo contactInfo7 = new ContactInfo("356010232", "studiomedicoconti@email.com", "", "");
         ContactInfo contactInfo8 = new ContactInfo("323040232", "studiomedicoconti@email.com", "", "");
 
-        contactInfoRepository.saveAll(List.of(contactInfo1, contactInfo2, contactInfo3,contactInfo4, contactInfo5, contactInfo6, contactInfo7, contactInfo8  ));
-
+        contactInfoRepository.saveAll(List.of(contactInfo1, contactInfo2, contactInfo3, contactInfo4, contactInfo5, contactInfo6, contactInfo7, contactInfo8));
 
 
         // Initialize locations
@@ -312,7 +307,7 @@ public class MongoInitializer implements CommandLineRunner {
         log.info("Successfully populated MongoDB data!");
     }
 
-    private void removeData(){
+    private void removeData() {
         appointmentRepository.deleteAll();
         reviewRepository.deleteAll();
         doctorRepository.deleteAll();
@@ -321,7 +316,7 @@ public class MongoInitializer implements CommandLineRunner {
         visitRepository.deleteAll();
     }
 
-    private void printData(){
+    private void printData() {
         log.info("APPOINTMENTS: {}", appointmentRepository.findAll());
         log.info("REVIEWS: {}", reviewRepository.findAll());
         log.info("DOCTORS: {}", doctorRepository.findAll());
