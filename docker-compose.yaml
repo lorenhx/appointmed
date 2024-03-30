@@ -1,4 +1,3 @@
-version: "3"
 services:
   appointmed-web-app:
     container_name: appointmed-web-app
