@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Manage appointments.")
-@RequestMapping("/api/appointment")
+@RequestMapping("/appointment")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;

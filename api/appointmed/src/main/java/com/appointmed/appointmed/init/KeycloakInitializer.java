@@ -131,10 +131,10 @@ public class KeycloakInitializer implements CommandLineRunner {
         ClientRepresentation client = new ClientRepresentation();
         client.setClientId(CLIENT_ID);
         client.setDirectAccessGrantsEnabled(true);
-        client.setRedirectUris(List.of("http://localhost/*"));
-        client.setBaseUrl("http://localhost/home");
+        client.setRedirectUris(List.of("http://appointmed.site/*"));
+        client.setBaseUrl("http://appointmed.site/home");
         client.setStandardFlowEnabled(true);
-        client.setRootUrl("http://localhost/");
+        client.setRootUrl("http://appointmed.site/");
         client.setWebOrigins(List.of("*"));
         client.setPublicClient(true);
 

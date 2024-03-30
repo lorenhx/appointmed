@@ -26,7 +26,7 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Manage doctors.")
-@RequestMapping("/api/doctor")
+@RequestMapping("/doctor")
 public class DoctorController {
 
     private final DoctorService doctorService;
