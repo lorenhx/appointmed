@@ -7,7 +7,6 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_APPOINTMED_REALM} #http://keycloak:8080/realms/appointmed #http://localhost/realms/appointmed
-          jwk-set-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_APPOINTMED_REALM}/protocol/openid-connect/certs
   config:
     import: vault://
 

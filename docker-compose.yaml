@@ -1,6 +1,7 @@
+version: '3.8'
 services:
   appointmed-web-app:
-    container_name: appointnmed.site
+    container_name: nginx
     build:
       context: ./spa
       args:
@@ -11,9 +12,11 @@ services:
         - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
     ports:
       - "80:80"
+    networks:
+       service-network:
 
   appointmed-api: 
-    container_name: api.appointmed.site
+    container_name: api
     restart: unless-stopped
     build:
       context: ./api/appointmed
@@ -31,10 +34,14 @@ services:
         - SMTP_USERNAME=${SMTP_USERNAME}
         - GOOGLE_OAUTH2_CLIENTID=${GOOGLE_OAUTH2_CLIENTID}
     ports:
-      - "9080:9080"
+      - "9080:8080"
+    networks:
+       api-network:
+       auth-api-network:
+       service-network:
 
   keycloak:
-      container_name: auth.appointmed.site
+      container_name: keycloak
       image: quay.io/keycloak/keycloak:23.0.1
       environment:
         KC_DB: postgres
@@ -58,9 +65,15 @@ services:
         - "--http-port=80"
       ports:
         - "8080:80"
+      networks:
+        auth-network:
+        service-network:
+        auth-api-network:    
+            aliases:
+              - auth.appointmed.site #Required so that iss claim in jwt is consistent between springboot and frontend
 
   postgres-keycloak:
-    container_name: db.auth.appointmed.site
+    container_name: postgres-keycloak
     image: postgres:latest
     environment:
       POSTGRES_DB: ${KEYCLOAK_DB_DATABASE}
@@ -69,9 +82,11 @@ services:
     restart: unless-stopped
     ports:
       - "5432:5432"
+    networks:
+       auth-network:
 
   mongodb:
-    container_name: db.api.appointmed.site
+    container_name: mongodb-api
     image: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
@@ -84,9 +99,11 @@ services:
     command: [--auth]
     ports:
       - "27017:27017"
+    networks:
+       api-network:
 
   vault:
-    container_name: secrets.appointmed.site
+    container_name: vault
     image: vault:1.13.3
     environment:
       - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_DEV_ROOT_TOKEN_ID}
@@ -94,3 +111,11 @@ services:
       - "8200:8200"
     cap_add:
       - IPC_LOCK
+    networks:
+       api-network:
+
+networks:
+  auth-network: 
+  api-network: 
+  auth-api-network: 
+  service-network: 

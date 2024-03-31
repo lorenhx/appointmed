@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert --volumes hostPath
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: vault
+  name: vault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: vault
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert --volumes hostPath
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/api-network: "true"
+        io.kompose.service: vault
+    spec:
+      containers:
+        - env:
+            - name: VAULT_DEV_ROOT_TOKEN_ID
+          image: vault:1.13.3
+          name: vault
+          ports:
+            - containerPort: 8200
+          resources: {}
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+      restartPolicy: Always
+status: {}

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert --volumes hostPath
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: appointmed-api
+  name: appointmed-api
+spec:
+  ports:
+    - name: "9080"
+      port: 9080
+      targetPort: 8080
+  selector:
+    io.kompose.service: appointmed-api
+status:
+  loadBalancer: {}

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert --volumes hostPath
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: keycloak
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert --volumes hostPath
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/auth-api-network: "true"
+        io.kompose.network/auth-network: "true"
+        io.kompose.network/service-network: "true"
+        io.kompose.service: keycloak
+    spec:
+      containers:
+        - args:
+            - start
+            - --proxy=edge
+            - --http-port=80
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_PASSWORD
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres-keycloak/
+            - name: KC_DB_USERNAME
+            - name: KC_FEATURES
+              value: token-exchange
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            - name: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+            - name: PROXY_ADDRESS_FORWARDING
+              value: "true"
+          image: quay.io/keycloak/keycloak:23.0.1
+          name: keycloak
+          ports:
+            - containerPort: 80
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/keycloak/themes
+              name: keycloak-hostpath0
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /home/centuri0n/appointmed/theme
+          name: keycloak-hostpath0
+status: {}
