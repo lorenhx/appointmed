@@ -137,6 +137,7 @@ public class KeycloakInitializer implements CommandLineRunner {
         client.setRootUrl("http://appointmed.site/");
         client.setWebOrigins(List.of("*"));
         client.setPublicClient(true);
+        client.setDefaultRoles(new String[]{"APPOINTMED_PATIENT"});
 
         realmResource.clients().create(client);
 
