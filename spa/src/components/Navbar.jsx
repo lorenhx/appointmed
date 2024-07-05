@@ -41,7 +41,13 @@ const Navbar = () => {
   const handleHomeClick = () => {
     navigate('/home');
   };
+  const handleCookieClick = () => {
+    window.location.href = 'https://storage.googleapis.com/appointmed-storage/policies/cookiepolicy.html';
+  };
 
+  const handlePrivacyClick = () => {
+    window.location.href = 'https://storage.googleapis.com/appointmed-storage/policies/privacypolicy.html';
+  };
   const navItems = [
     { id: 1, text: 'Home', onClick: handleHomeClick },
     isAuthenticated
@@ -53,7 +59,8 @@ const Navbar = () => {
     hasDoctorRole
       ? { id: 4, text: 'Manage', onClick: () => handleManageClick() }
       : null,
-    { id: 5, text: 'Contacts', onClick: null },
+    { id: 5, text: 'Privacy Policy', onClick: () => handlePrivacyClick() },
+    { id: 6, text: 'Cookie Policy', onClick: () => handleCookieClick() }
   ];
 
   return (

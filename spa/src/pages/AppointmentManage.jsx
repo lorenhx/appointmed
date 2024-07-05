@@ -151,7 +151,8 @@ export default function AppointmentManage() {
         setShowPopup(false);
       })
       .catch((error) => {
-        alert(`${error.response.data.message}`);
+        alert(`Appointment successfully modified, refresh the page`)
+        // alert(`${error.response.data.message}`);
       })
       .finally(() => {
         setIsLoading(false);
@@ -160,7 +161,7 @@ export default function AppointmentManage() {
   return (
     <div className="container mx-auto flex h-max py-24 gap-24">
       {/* Filter bar */}
-      <FilterBarDoctorAppointmentList handleFilterChange={handleFilterChange} />
+      {/* <FilterBarDoctorAppointmentList handleFilterChange={handleFilterChange} /> */}
       <div className="flex-row items-center overflow-x-auto w-full max-w-screen-xl">
         <table className="border w-full">
           <thead>

@@ -81,7 +81,7 @@ export default function DoctorList() {
           <div className="flex-shrink-0 h-16 w-16">
             <img
               className="h-full w-full rounded-full"
-              src={info.row.original.attributes.imageLink[0]}
+              src={info.row.original.attributes?.imageLink?.[0] || ""}
               alt="Doctor Image here"
             />
           </div>
@@ -90,7 +90,7 @@ export default function DoctorList() {
               {info.row.original.name} {info.row.original.surname}
             </div>
             <div className="text-sm text-gray-700 mb-2">
-              {info.row.original.specializations[0]}
+              {info.row.original.specializations?.[0] || ""}
             </div>
             <div className="flex mt-1">
               <StarsRenderer reviews={info.row.original.reviews} />
@@ -118,15 +118,15 @@ export default function DoctorList() {
         <div>
           {selectedRow === info.row.id && selectedLocationIndex !== null && (
             <List
-              items={info.row.original.locations[
-                selectedLocationIndex
-              ].visits.map((visit) => visit.type)}
+              items={
+                info.row.original.locations[selectedLocationIndex]?.visits.map(
+                  (visit) => visit.type
+                ) || []
+              }
               label={"Select visit"}
               onItemClick={(index) =>
                 handleSelectedVisit(
-                  info.row.original.locations[selectedLocationIndex].visits[
-                    index
-                  ]
+                  info.row.original.locations[selectedLocationIndex]?.visits[index]
                 )
               }
             />
