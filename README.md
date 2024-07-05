@@ -9,6 +9,7 @@ The app was built starting with security requisites such as:
 - Authentication & Authorization
 - Accountability
 - Privacy and Compliance (GDPR)
+## NIST Risk Management Framework usage
 Other than those, in the design phase a threat analysis has been conducted, leading to the identification of mitigations through the use of the NIST Risk Management Framework SP 800-53 Rev. 5.1 which shows security control to follow to reach desired cybersecurity posture. The publication NIST SP 800-53B, introduces the Control Baselines, to follow after choosing the cybersecurity posture desired.
 This app reached the medium-impact Control Baseline in the main categories:
 - Access Control
