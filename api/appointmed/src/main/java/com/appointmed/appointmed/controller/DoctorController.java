@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Manage doctors.")
@@ -33,7 +36,7 @@ public class DoctorController {
     private final UserService userService;
     private final DoctorMapper doctorMapper;
     private final EmailService emailService;
-
+    private static final Logger logger = LoggerFactory.getLogger(DoctorController.class);
 
     @Operation(
             summary = "Gets doctor list.",
@@ -41,9 +44,12 @@ public class DoctorController {
     @GetMapping()
     public DoctorListDataDto getDoctorListData(@RequestParam List<Specialization> specializations, @RequestParam String location, @RequestParam int range) {
         List<DoctorDto> doctors;
+        logger.info("Getting doctors list");
         try {
             doctors = getDoctorsBySpecializationsAndLocationInRange(specializations, location, range);
+            logger.debug("Successful got doctors list");
         } catch (LocationToCoordinatesException e) {
+            logger.error("Error processing request to get doctor's list because of: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
         return new DoctorListDataDto(new DoctorFiltersDto(extractVisitTypes(doctors)), doctors);
@@ -66,13 +72,17 @@ public class DoctorController {
     @PostMapping
     @PreAuthorize("hasRole('APPOINTMED_ADMIN')")
     public void addDoctor(@RequestBody DoctorDto doctorDto) {
+        logger.info("Adding a doctor");
         String temporaryPassword = userService.addUser(doctorDto.getName(), doctorDto.getSurname(), doctorDto.getEmail(),
                 doctorDto.getAttributes(), new String[]{"APPOINTMED_DOCTOR"});
         doctorService.addDoctor(doctorMapper.doctorDtoToDoctor(doctorDto));
         try {
             emailService.sendHtmlEmail("appointmed@outlook.it", doctorDto.getEmail(), "Doctor account created.",
                     HtmlTemplateGenerator.generateAccountConfirmationEmail(doctorDto.getName(), doctorDto.getSurname(), temporaryPassword));
+            logger.debug("Successful added the doctor");
+
         } catch (MessagingException e) {
+            logger.error("Error processing request to add a doctor because of: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
         }
     }

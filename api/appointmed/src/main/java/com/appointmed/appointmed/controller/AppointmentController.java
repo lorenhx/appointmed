@@ -26,6 +26,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Manage appointments.")
@@ -37,7 +40,7 @@ public class AppointmentController {
     private final AppointmentMapper appointmentMapper;
     private final ContactInfoMapper contactInfoMapper;
     private final EmailService emailService;
-
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentController.class);
     @Operation(
             summary = "Creates appointment in PENDING state.",
             description = "A patient can create an appointment. The appointment will be persisted on the database and a confirmation email will be sent to the patient.",
@@ -46,14 +49,20 @@ public class AppointmentController {
     @PreAuthorize("hasRole('APPOINTMED_PATIENT')")
     public void createAppointment(@RequestBody CreateAppointmentDto createAppointmentDto) {
         Appointment appointment = createAppointmentMapper.createAppointmentDtoToAppointment(createAppointmentDto);
+        logger.info("Received request to create appointment from patient {}", createAppointmentDto.getPatientEmail());
         try {
             appointmentService.createAppointment(appointment);
             emailService.sendHtmlEmail("appointmed@outlook.it", createAppointmentDto.getPatientEmail(), "Appointmed pending reservation", HtmlTemplateGenerator.generateReservationPendingTemplate(createAppointmentDto.getAddress()));
+            logger.debug("Created appointment in PENDING state for patient {}",  createAppointmentDto.getPatientEmail());
+
         } catch (DoctorNotFound | VisitNotFound e) {
+            logger.error("Error processing request to create appointment for patient because of doctor or visit not found: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (AppointmentAlreadyExists | IDORException e) {
+            logger.error("Error processing request to create appointment for patient because of appointmed already exists: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (MessagingException e) {
+            logger.error("Error processing request to create appointment for patient because of internal error: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
         }
     }
@@ -66,14 +75,19 @@ public class AppointmentController {
     @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
     public void updateAppointmentStatus(@PathVariable String appointmentId, @RequestBody UpdateAppointmentDto updateAppointmentDto) {
         ReservationStatus status = updateAppointmentDto.getStatus();
+        logger.info("Received request to confirm or reject an appointment from a doctor, in this case the status is set to {}",  updateAppointmentDto.getStatus());
         try {
             appointmentService.updateAppointmentStatus(appointmentId, status, updateAppointmentDto.getNotes());
             sendNotificationEmail(appointmentId, updateAppointmentDto);
+            logger.debug("Update appointment status in {}", updateAppointmentDto.getStatus());
         } catch (AppointmentNotFound | DoctorNotFound e) {
+            logger.error("Error processing request to update appointment status because of appointment or doctor not found: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IDORException e) {
+            logger.error("Error processing request to update appointment status because of: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (MessagingException e) {
+            logger.error("Error processing request to update appointment status because of: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong");
         }
     }
@@ -86,9 +100,13 @@ public class AppointmentController {
     @PreAuthorize("hasRole('APPOINTMED_DOCTOR')")
     public DoctorAppointmentListDataDto getDoctorAppointmentListData() {
         List<Appointment> appointments;
+        logger.info("Received request to get appointments");
         try {
             appointments = appointmentService.getAppointmentsByDoctorEmail(Oauth2TokenIntrospection.extractEmail());
+            logger.debug("Successful got appointments");
+
         } catch (DoctorNotFound e) {
+            logger.error("Error processing request to get appointments because of: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
         List<AppointmentDto> appointmentDtos = appointments.stream()
@@ -106,7 +124,7 @@ public class AppointmentController {
     @GetMapping("/availability")
     public AppointmentAvailabilityDto getAppointmentAvailability(@RequestParam String visitType) {
         List<Appointment> appointments = appointmentService.getAppointmentsByVisitType(visitType);
-
+        logger.info("Received request to  to get appointments availabillity");
         System.out.println(visitType);
         int timeSlotMinutes = appointments.get(0).getVisit().getTimeSlotMinutes();
 
@@ -121,6 +139,7 @@ public class AppointmentController {
         Appointment appointment = appointmentService.getAppointmentById(appointmentId);
         Location location = appointment.getLocation();
         List<ContactInfoDto> contactInfoDtos = location.getContactInfo().stream().map(contactInfoMapper::contactInfoToContactInfoDto).toList();
+        logger.info("Sending notification email to patient");
         if (updateAppointmentDto.getStatus().equals(ReservationStatus.CONFIRMED)) {
             sendConfirmationEmail(appointment, location, contactInfoDtos, updateAppointmentDto.getNotes());
         } else if (updateAppointmentDto.getStatus().equals(ReservationStatus.REJECTED)) {
@@ -130,6 +149,7 @@ public class AppointmentController {
 
 
     private void sendConfirmationEmail(Appointment appointment, Location location, List<ContactInfoDto> contactInfoDtos, String notes) throws MessagingException {
+        logger.info("Sending confirmation email to patients");
         emailService.sendHtmlEmail(
                 "appointmed@outlook.it",
                 appointment.getPatientEmail(),
@@ -146,6 +166,7 @@ public class AppointmentController {
     }
 
     private void sendRejectionEmail(Appointment appointment, Location location, List<ContactInfoDto> contactInfoDtos, String notes) throws MessagingException {
+        logger.info("Sending rejection email to patients");
         emailService.sendHtmlEmail(
                 "appointmed@outlook.it",
                 appointment.getPatientEmail(),
