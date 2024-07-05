@@ -1,10 +1,40 @@
-# appointmed
+# Appointmed 
+Appointmed is a web application in the healthcare field that allows patients to find the specialist that best suits their needs and at the same time provides tools for professionals to manage the flow of patients.
+## Secure by design
+The app was built starting with security requisites such as:
+- Availability
+- Confidentiality
+- Data protection & Integrity
+- Authentication & Authorization
+- Accountability
+- Privacy and Compliance (GDPR)
+Other than those, in the design phase a threat analysis has been conducted, leading to the identification of mitigations through the use of the NIST Risk Management Framework SP 800-53 Rev. 5.1 which shows security control to follow to reach desired cybersecurity posture. The publication NIST SP 800-53B, introduces the Control Baselines, to follow after choosing the cybersecurity posture desired.
+This app reached the medium-impact Control Baseline in the main categories:
+- Access Control
+- Identification and Authentication
+- Audit and Accountability
+- System and Communication Protection
+## Architecture - Deployment Diagram
+![image](https://github.com/lorenhx/appointmed/assets/33938788/3d0d4a66-3ce3-42dc-8785-99c737ab3a75)
+## Demo
+### Registration
+https://github.com/lorenhx/appointmed/assets/33938788/203da1de-44fa-419a-9070-cfe2564bdece
+### Login
+https://github.com/lorenhx/appointmed/assets/33938788/8a0f0ae5-2889-4098-8c5b-2f89633ec59e
+### Appointment booking
+https://github.com/lorenhx/appointmed/assets/33938788/5e97673b-d0c0-4b8c-8b7d-6eb9c0f503e2
+### Doctor management of appointments 
+https://github.com/lorenhx/appointmed/assets/33938788/871a15fa-77d3-464b-a6c5-f46723a9b4c8
 
-To run it locally.
 
-1. Add "127.0.0.1 appointmed.site", "127.0.0.1 api.appointmed.site", "127.0.0.1 auth.appointmed.site" to /etc/hosts or C:\Windows\System32\drivers\etc\hosts
-2. Add .env following configuration in env.example.env 
-3. Run docker compose build && docker compose up -d
-4. Set vault secrets in ./initVault.sh
-5. Wait that vault service starts and run ./initVault.sh or ./initVault.ps1 (Require you to have vault installed, for now..)
-6. When services are up, connect to http://appointmed.site
+
+
+
+
+
+
+
+
+
+ 
+
