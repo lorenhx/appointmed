@@ -10,10 +10,23 @@ services:
         - VITE_GOOGLE_API_KEY=${VITE_GOOGLE_API_KEY}
         - VITE_KEYCLOAK_REALM=${VITE_KEYCLOAK_REALM}
         - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
+    volumes:
+      - ./spa/certs:/etc/nginx/certs
+      - ./spa/logs:/var/log/nginx/
     ports:
       - "80:80"
+      - "443:443"  # Expose port 443 for HTTPS
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     networks:
        service-network:
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./spa/certs:/etc/letsencrypt
+    command: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - appointmed-web-app
 
   appointmed-api: 
     container_name: api
@@ -39,7 +52,12 @@ services:
        api-network:
        auth-api-network:
        service-network:
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+  
   keycloak:
       container_name: keycloak
       image: quay.io/keycloak/keycloak:23.0.1
@@ -55,14 +73,25 @@ services:
         KC_METRICS_ENABLED: 'true'
         KC_FEATURES: token-exchange
         KC_HTTP_ENABLED: 'true'
+        # KC_HOSTNAME: 'auth.appointmed.site'
         PROXY_ADDRESS_FORWARDING: 'true'
+        KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/server.crt.pem
+        KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/server.key.pem
         KC_HOSTNAME_STRICT_BACKCHANNEL: 'false'
       volumes:
         - ./theme:/opt/keycloak/themes
+        - ./server.crt.pem:/opt/keycloak/conf/server.crt.pem
+        - ./server.key.pem:/opt/keycloak/conf/server.key.pem
+        - .:/opt/jboss/keycloak/standalone/log
       command:
         - "start"
         - "--proxy=edge"
         - "--http-port=80"
+        - "--https-port=443"
+#        - "--log-level=ALL"
+#        - "--log=file" 
+#        - "--log-file-format=\"'%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n'\" "
+#        - "--log-file=/opt/jboss/keycloak/standalone/log/keycloak.log"
       ports:
         - "8080:80"
       networks:
@@ -99,6 +128,11 @@ services:
     command: [--auth]
     ports:
       - "27017:27017"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
     networks:
        api-network:
 
@@ -113,7 +147,11 @@ services:
       - IPC_LOCK
     networks:
        api-network:
-
+    logging:
+        driver: "json-file"
+        options:
+          max-size: "10m"
+          max-file: "5"
 networks:
   auth-network: 
   api-network: 
