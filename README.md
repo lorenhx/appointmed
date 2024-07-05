@@ -1,5 +1,6 @@
 # Appointmed 
 Appointmed is a web application in the healthcare field that allows patients to find the specialist that best suits their needs and at the same time provides tools for professionals to manage the flow of patients.
+![image](https://github.com/lorenhx/appointmed/assets/33938788/ea57573d-dff6-46de-9b5b-b3fa7be75839)
 ## Secure by design
 The app was built starting with security requisites such as:
 - Availability
@@ -24,7 +25,8 @@ https://github.com/lorenhx/appointmed/assets/33938788/8a0f0ae5-2889-4098-8c5b-2f
 ### Appointment booking
 https://github.com/lorenhx/appointmed/assets/33938788/5e97673b-d0c0-4b8c-8b7d-6eb9c0f503e2
 ### Doctor management of appointments 
-https://github.com/lorenhx/appointmed/assets/33938788/871a15fa-77d3-464b-a6c5-f46723a9b4c8
+https://github.com/lorenhx/appointmed/assets/33938788/ea661cde-ab91-4e68-a61a-333955914420
+
 
 
 
