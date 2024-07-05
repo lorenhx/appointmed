@@ -13,7 +13,13 @@ FROM openjdk:17.0.1-jdk-slim
 
 WORKDIR /app
 
+COPY server.crt.pem /app/server.crt.pem
+
 COPY --from=build /app/target/appointmed-*.jar ./
+
+
+RUN keytool -import -trustcacerts -keystore /usr/local/openjdk-17/lib/security/cacerts \
+   -storepass changeit -noprompt -alias mycert -file /app/server.crt.pem
 
 ARG VAULT_TOKEN
 ARG VAULT_URL
@@ -41,6 +47,7 @@ ENV SMTP_PORT=${SMTP_PORT}
 ENV SMTP_USERNAME=${SMTP_USERNAME}
 ENV GOOGLE_OAUTH2_CLIENTID=${GOOGLE_OAUTH2_CLIENTID}
 
+# Modify CMD to specify the truststore
 CMD ["sh", "-c", "\
 java -jar \
 -DVAULT_TOKEN=$VAULT_TOKEN \
@@ -56,3 +63,4 @@ java -jar \
 -DSMTP_USERNAME=$SMTP_USERNAME \
 -DGOOGLE_OAUTH2_CLIENTID=$GOOGLE_OAUTH2_CLIENTID \
 appointmed-*.jar"]
+
